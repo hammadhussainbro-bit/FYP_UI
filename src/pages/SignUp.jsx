@@ -76,16 +76,16 @@ const SignUp = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${
+    <div className={`min-h-screen flex flex-col overflow-x-hidden w-full ${
       theme === 'dark' 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
     }`}>
       <Navbar />
       
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-20">
+      <div className="flex-1 flex items-center justify-center px-3 sm:px-4 md:px-6 lg:px-8 py-12 sm:py-16 md:py-20 w-full overflow-x-hidden">
         <div className="max-w-md w-full">
-          <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-6 md:p-8 border border-white/20 animate-fadeIn">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-5 md:p-6 lg:p-8 border border-white/20 animate-fadeIn w-full">
             <div className="text-center mb-8">
               <img 
                 src="/logo.svg" 
@@ -219,12 +219,12 @@ const SignUp = () => {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl hover:scale-105"
-              >
-                Sign Up
-              </button>
+                      <button
+                        type="submit"
+                        className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold active:from-blue-600 active:to-indigo-700 transition-all shadow-lg active:shadow-xl active:scale-[0.98] touch-manipulation min-h-[44px]"
+                      >
+                        Sign Up
+                      </button>
             </form>
 
             <div className="mt-6 text-center">

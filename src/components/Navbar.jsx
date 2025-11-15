@@ -32,25 +32,33 @@ const Navbar = () => {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Check if click is outside mobile menu
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
         const menuButton = event.target.closest('button[aria-label="Toggle menu"]');
-        if (!menuButton) {
+        const themeButton = event.target.closest('button[aria-label="Toggle theme"]');
+        if (!menuButton && !themeButton) {
           setIsMenuOpen(false);
         }
       }
+      // Check if click is outside user menu
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        clearUserMenuTimeout();
-        setIsUserMenuOpen(false);
+        const userButton = event.target.closest('button[aria-label="User menu"]');
+        if (!userButton) {
+          clearUserMenuTimeout();
+          setIsUserMenuOpen(false);
+        }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, []);
+    if (isMenuOpen || isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
+    }
+  }, [isMenuOpen, isUserMenuOpen]);
 
   // Clear timeout helper
   const clearUserMenuTimeout = () => {
@@ -99,9 +107,9 @@ const Navbar = () => {
       theme === 'dark' 
         ? 'bg-gray-900/90 backdrop-blur-md border-b border-gray-700' 
         : 'bg-white/10 backdrop-blur-md border-b border-white/20'
-    } sticky top-0 z-50 transition-colors safe-area-top`}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-        <div className="flex justify-between items-center min-h-[60px] sm:min-h-[64px] h-14 sm:h-16">
+    } sticky top-0 z-50 transition-colors safe-area-top w-full overflow-x-hidden`} style={{ width: '100%', maxWidth: '100vw' }}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full" style={{ width: '100%', maxWidth: '100%' }}>
+        <div className="flex justify-between items-center min-h-[56px] sm:min-h-[60px] md:min-h-[64px] h-14 sm:h-15 md:h-16 w-full overflow-x-hidden">
           <Link to="/" className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
             <img 
               src="/logo.svg" 
@@ -434,9 +442,9 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className={`md:hidden py-3 sm:py-4 space-y-2 sm:space-y-3 max-h-[calc(100vh-80px)] overflow-y-auto overscroll-contain ${
+          <div className={`md:hidden py-3 sm:py-4 space-y-2 sm:space-y-3 max-h-[calc(100vh-70px)] overflow-y-auto overscroll-contain w-full ${
             theme === 'dark' ? 'border-t border-gray-700' : 'border-t border-white/20'
-          }`}>
+          }`} style={{ WebkitOverflowScrolling: 'touch' }}>
                     {location.pathname !== '/' && (
                       <Link
                         to="/"

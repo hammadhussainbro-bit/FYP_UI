@@ -45,7 +45,7 @@ const Login = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${
+    <div className={`min-h-screen flex flex-col overflow-x-hidden w-full ${
       theme === 'dark' 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
@@ -118,12 +118,12 @@ const Login = () => {
                 </Link>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl hover:scale-105"
-              >
-                Sign In
-              </button>
+                      <button
+                        type="submit"
+                        className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold active:from-blue-600 active:to-indigo-700 transition-all shadow-lg active:shadow-xl active:scale-[0.98] touch-manipulation min-h-[44px]"
+                      >
+                        Sign In
+                      </button>
             </form>
 
             <div className="mt-6 text-center">

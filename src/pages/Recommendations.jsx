@@ -472,14 +472,14 @@ const Recommendations = () => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${
+    <div className={`min-h-screen flex flex-col overflow-x-hidden w-full ${
       theme === 'dark' 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
     }`}>
       <Navbar />
       
-      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+      <div className="flex-1 px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12 w-full overflow-x-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8 sm:mb-12 px-2">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">

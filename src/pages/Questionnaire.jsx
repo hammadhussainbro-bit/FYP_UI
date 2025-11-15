@@ -33,11 +33,11 @@ const Chip = ({ active, children }) => {
 const CardWrap = ({ children, accent = 'from-indigo-500 to-fuchsia-500' }) => {
   const { theme } = useTheme();
   return (
-    <div className="relative overflow-hidden rounded-2xl">
+    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl w-full">
       <div className={`absolute inset-0 bg-gradient-to-r ${
         theme === 'dark' ? 'from-gray-800 to-gray-700' : accent
       } opacity-70 blur`}></div>
-      <div className={`relative rounded-2xl backdrop-blur-md border p-6 ${
+      <div className={`relative rounded-xl sm:rounded-2xl backdrop-blur-md border p-4 sm:p-5 md:p-6 w-full ${
         theme === 'dark' 
           ? 'bg-gray-800/40 border-gray-700/50' 
           : 'bg-white/30 border-white/20'
@@ -317,13 +317,13 @@ const Questionnaire = () => {
   // Unified option class
   const optionClass = (active) => {
     if (theme === 'dark') {
-      return `flex items-center justify-center p-4 rounded-xl cursor-pointer transition-all border ${
+      return `flex items-center justify-center p-3 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer transition-all border ${
         active 
           ? 'bg-purple-600 text-white border-purple-500' 
-          : 'bg-gray-700/50 text-gray-200 border-gray-600 hover:bg-gray-700'
+          : 'bg-gray-700/50 text-gray-200 border-gray-600 active:bg-gray-700'
       }`;
     }
-    return `flex items-center justify-center p-4 rounded-xl cursor-pointer transition-all border border-white/20 bg-white/10 text-black hover:purple-200 ${
+    return `flex items-center justify-center p-3 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer transition-all border border-white/20 bg-white/10 text-black active:bg-purple-200 ${
       active ? 'bg-purple-200 text-indigo-700 border-purple' : ''
     }`;
   };
@@ -383,9 +383,9 @@ const Questionnaire = () => {
       // Step 4
       <CardWrap accent={cardAccent}>
         <QuestionCard question="What is your preferred university type?" required>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {['Public', 'Private', 'Both'].map((type) => (
-              <label key={type} className={optionClass(formData.preferredUniversityType === type)}>
+              <label key={type} className={`${optionClass(formData.preferredUniversityType === type)} min-h-[44px] touch-manipulation text-xs sm:text-sm`}>
                 <input
                   type="radio"
                   name="universityType"
@@ -403,9 +403,9 @@ const Questionnaire = () => {
       // Step 5
       <CardWrap accent={cardAccent}>
         <QuestionCard question="Which cities do you prefer? (Select multiple)" required>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
             {cities.map((city) => (
-              <button key={city} type="button" onClick={() => handleCityToggle(city)} className={optionClass(formData.preferredCities?.includes(city))}>
+              <button key={city} type="button" onClick={() => handleCityToggle(city)} className={`${optionClass(formData.preferredCities?.includes(city))} min-h-[44px] touch-manipulation text-xs sm:text-sm`}>
                 {city}
               </button>
             ))}
@@ -417,7 +417,7 @@ const Questionnaire = () => {
         <QuestionCard question="What is your budget per semester?" required>
           <div className="flex flex-wrap gap-2">
             {budgetRanges.map((range) => (
-              <label key={range} className={optionClass(formData.budgetPerSemester === range)}>
+              <label key={range} className={`${optionClass(formData.budgetPerSemester === range)} min-h-[44px] touch-manipulation text-xs sm:text-sm`}>
                 <input
                   type="radio"
                   name="budget"
@@ -437,7 +437,7 @@ const Questionnaire = () => {
         <QuestionCard question="What is your scholarship preference?" required>
           <div className="flex flex-wrap gap-2">
             {scholarshipOptions.map((option) => (
-              <label key={option} className={optionClass(formData.scholarshipPreference === option)}>
+              <label key={option} className={`${optionClass(formData.scholarshipPreference === option)} min-h-[44px] touch-manipulation text-xs sm:text-sm`}>
                 <input
                   type="radio"
                   name="scholarship"
@@ -457,7 +457,7 @@ const Questionnaire = () => {
         <QuestionCard question="What are your academic interests? (Select multiple)" required>
           <div className="flex flex-wrap gap-2">
             {academicInterests.map((interest) => (
-              <button key={interest} type="button" onClick={() => handleInterestToggle(interest)} className={optionClass(formData.academicInterests?.includes(interest))}>
+              <button key={interest} type="button" onClick={() => handleInterestToggle(interest)} className={`${optionClass(formData.academicInterests?.includes(interest))} min-h-[44px] touch-manipulation`}>
                 <Chip active={formData.academicInterests?.includes(interest)}>{interest}</Chip>
               </button>
             ))}
@@ -467,9 +467,9 @@ const Questionnaire = () => {
       // Step 9
       <CardWrap accent={cardAccent}>
         <QuestionCard question="What is your career preference?" required>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             {careerPreferences.map((career) => (
-              <label key={career} className={optionClass(formData.careerPreference === career)}>
+              <label key={career} className={`${optionClass(formData.careerPreference === career)} min-h-[44px] touch-manipulation text-xs sm:text-sm`}>
                 <input
                   type="radio"
                   name="career"
@@ -487,9 +487,9 @@ const Questionnaire = () => {
       // Step 10
       <CardWrap accent={cardAccent}>
         <QuestionCard question="Are you willing to relocate for your studies?" required>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {['Yes', 'No', 'Maybe'].map((option) => (
-              <label key={option} className={optionClass(formData.willingToRelocate === option)}>
+              <label key={option} className={`${optionClass(formData.willingToRelocate === option)} min-h-[44px] touch-manipulation text-xs sm:text-sm`}>
                 <input
                   type="radio"
                   name="relocate"
@@ -509,7 +509,7 @@ const Questionnaire = () => {
         <QuestionCard question="What are your extra-curricular interests? (Select multiple)" required>
           <div className="flex flex-wrap gap-2">
             {extraCurricularOptions.map((activity) => (
-              <button key={activity} type="button" onClick={() => handleExtraCurricularToggle(activity)} className={optionClass(formData.extraCurricularInterests?.includes(activity))}>
+              <button key={activity} type="button" onClick={() => handleExtraCurricularToggle(activity)} className={`${optionClass(formData.extraCurricularInterests?.includes(activity))} min-h-[44px] touch-manipulation`}>
                 <Chip active={formData.extraCurricularInterests?.includes(activity)}>{activity}</Chip>
               </button>
             ))}
@@ -549,57 +549,57 @@ const Questionnaire = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${
+    <div className={`min-h-screen flex flex-col overflow-x-hidden w-full ${
       theme === 'dark' 
         ? 'bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-b from-indigo-700 via-violet-700 to-fuchsia-700'
     }`}>
       <Navbar />
 
-      <div className="sticky top-0 z-30 bg-gradient-to-b from-indigo-900/70 to-violet-900/30 backdrop-blur supports-[backdrop-filter]:bg-indigo-900/40 border-b border-white/10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between">
-          <div className="text-white/90 font-semibold text-sm sm:text-base">Questionnaire</div>
-          <div className="text-white/80 text-xs sm:text-sm">Step {currentStep} of {totalSteps}</div>
+      <div className="sticky top-[56px] sm:top-[60px] md:top-[64px] z-30 bg-gradient-to-b from-indigo-900/70 to-violet-900/30 backdrop-blur supports-[backdrop-filter]:bg-indigo-900/40 border-b border-white/10 w-full">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between w-full">
+          <div className="text-white/90 font-semibold text-xs sm:text-sm md:text-base truncate">Questionnaire</div>
+          <div className="text-white/80 text-xs sm:text-sm whitespace-nowrap ml-2">Step {currentStep} of {totalSteps}</div>
         </div>
       </div>
 
-      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-10">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-6 sm:mb-8 animate-fadeIn px-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">Tell us about yourself</h1>
-            <p className="text-white/80 mt-1 text-sm sm:text-base">We'll personalize your university recommendations.</p>
+      <div className="flex-1 px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-10 w-full overflow-x-hidden">
+        <div className="max-w-5xl mx-auto w-full">
+          <div className="text-center mb-4 sm:mb-6 md:mb-8 animate-fadeIn px-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">Tell us about yourself</h1>
+            <p className="text-white/80 mt-1 text-xs sm:text-sm md:text-base">We'll personalize your university recommendations.</p>
           </div>
 
           <QuestionStepper currentStep={currentStep} totalSteps={totalSteps} />
 
           {/* Error Message */}
           {errorMessage && (
-            <div className="mt-4 questionnaire-error bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm animate-fadeIn">
+            <div className="mt-3 sm:mt-4 questionnaire-error bg-red-500/20 border border-red-500/50 text-red-200 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-fadeIn w-full">
               {errorMessage}
             </div>
           )}
 
-          <div className="mt-4 sm:mt-6 relative min-h-[300px] sm:min-h-[380px] md:min-h-[420px] w-full overflow-hidden questionnaire-step-container">
+          <div className="mt-3 sm:mt-4 md:mt-6 relative min-h-[250px] sm:min-h-[300px] md:min-h-[380px] lg:min-h-[420px] w-full overflow-hidden questionnaire-step-container">
             <AnimatedStep isAnimating={isAnimating} direction={direction} stepKey={currentStep}>
               {renderStep()}
             </AnimatedStep>
           </div>
 
-          <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 md:gap-4 w-full">
             <button
               onClick={prevStep}
               disabled={currentStep === 1}
-              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all ${
+              className={`px-4 sm:px-6 py-3 sm:py-2.5 md:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all touch-manipulation min-h-[44px] ${
                 currentStep === 1
                   ? 'bg-white/20 text-white/50 cursor-not-allowed'
-                  : 'bg-white/10 text-white border border-white/20 hover:bg-white/20 hover:-translate-y-0.5'
+                  : 'bg-white/10 text-white border border-white/20 active:bg-white/20'
               }`}
             >
               Back
             </button>
             <button
               onClick={nextStep}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base text-indigo-700 bg-white shadow hover:shadow-lg hover:-translate-y-0.5 transition"
+              className="px-4 sm:px-6 py-3 sm:py-2.5 md:py-3 rounded-xl font-semibold text-sm sm:text-base text-indigo-700 bg-white shadow active:shadow-lg transition touch-manipulation min-h-[44px]"
             >
               {currentStep === totalSteps ? 'Get Recommendations' : 'Next'}
             </button>

@@ -31,12 +31,12 @@ const TestimonialCard = ({ quote, name, title }) => {
 const FeatureCard = ({ title, desc, icon, gradient }) => {
   const ref = useRevealOnScroll();
   return (
-    <div ref={ref} className="glass rounded-2xl p-6 hover:bg-white/20 transition-colors">
-      <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 ${gradient}`}>
+    <div ref={ref} className="glass rounded-2xl p-4 sm:p-5 md:p-6 active:bg-white/20 transition-colors">
+      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-3 sm:mb-4 ${gradient}`}>
         {icon}
       </div>
-      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-      <p className="text-white/80">{desc}</p>
+      <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{title}</h3>
+      <p className="text-white/80 text-sm sm:text-base">{desc}</p>
     </div>
   );
 };
@@ -72,7 +72,7 @@ const Landing = () => {
   const heroRef = useRevealOnScroll();
 
   return (
-    <div className={`min-h-screen flex flex-col ${
+    <div className={`min-h-screen flex flex-col overflow-x-hidden w-full ${
       theme === 'dark' 
         ? 'bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-b from-indigo-700 via-violet-700 to-fuchsia-700'
@@ -92,7 +92,7 @@ const Landing = () => {
               Smart University Recommendations
             </div>
             {userName && (
-              <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-orange-400 via-amber-300 to-white bg-clip-text text-transparent leading-[1.1] tracking-tight mb-2 px-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black bg-gradient-to-r from-orange-400 via-amber-300 to-white bg-clip-text text-transparent leading-[1.1] tracking-tight mb-2 px-2">
                 Hello {userName}
               </div>
             )}
@@ -141,11 +141,11 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white text-center mb-10">Why Choose MeritVoyage?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Features */}
+              <section className="py-8 sm:py-12 md:py-16 px-3 sm:px-4 md:px-6 lg:px-8 w-full overflow-x-hidden">
+                <div className="max-w-7xl mx-auto w-full">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white text-center mb-6 sm:mb-8 md:mb-10 px-2">Why Choose MeritVoyage?</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <FeatureCard
               title="Smart Matching"
               desc="AI-driven matching aligns your academic profile, preferences, and goals with the right programs."
@@ -180,11 +180,11 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white text-center mb-10">What students say</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Testimonials */}
+              <section className="py-8 sm:py-12 md:py-16 px-3 sm:px-4 md:px-6 lg:px-8 w-full overflow-x-hidden">
+                <div className="max-w-7xl mx-auto w-full">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white text-center mb-6 sm:mb-8 md:mb-10 px-2">What students say</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <TestimonialCard
               name="Ayesha Khan"
               title="BSc Computer Science, Class of 2027"

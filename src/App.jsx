@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { FormProvider } from './context/FormContext';
 import { ThemeProvider } from './context/ThemeContext';
 import AIChatBox from './components/AIChatBox';
+import ScrollToTop from './components/ScrollToTop';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -30,6 +31,7 @@ function App() {
     <ThemeProvider>
       <FormProvider>
         <Router>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
