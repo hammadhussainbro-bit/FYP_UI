@@ -1,12 +1,24 @@
+import { useTheme } from '../context/ThemeContext';
+
 const AlternativeProgramCard = ({ program }) => {
+  const { theme } = useTheme();
+  
   return (
-    <div className="bg-gradient-to-br from-white to-amber-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-amber-100">
+    <div className={`${
+      theme === 'dark'
+        ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700'
+        : 'bg-gradient-to-br from-gray-50 to-amber-50/50 border-amber-200/50'
+    } rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-xl font-bold text-gray-800 mb-2">
+          <h3 className={`text-xl font-bold mb-2 ${
+            theme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+          }`}>
             {program.programName}
           </h3>
-          <p className="text-gray-600 text-sm mb-2">{program.university}</p>
+          <p className={`text-sm mb-2 ${
+            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+          }`}>{program.university}</p>
           <div className="flex items-center space-x-2">
             <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold">
               Alternative
@@ -22,27 +34,41 @@ const AlternativeProgramCard = ({ program }) => {
       </div>
 
       <div className="mb-4">
-        <h4 className="font-semibold text-gray-800 mb-2">Description:</h4>
-        <p className="text-gray-700 text-sm">{program.description}</p>
+        <h4 className={`font-semibold mb-2 ${
+          theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+        }`}>Description:</h4>
+        <p className={`text-sm ${
+          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+        }`}>{program.description}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-gray-500 text-xs mb-1">Tuition Fee</p>
-          <p className="text-gray-800 font-semibold text-sm">
+          <p className={`text-xs mb-1 ${
+            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+          }`}>Tuition Fee</p>
+          <p className={`font-semibold text-sm ${
+            theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+          }`}>
             {program.tuitionFee}
           </p>
         </div>
         <div>
-          <p className="text-gray-500 text-xs mb-1">Career Path</p>
-          <p className="text-gray-800 font-semibold text-sm">
+          <p className={`text-xs mb-1 ${
+            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+          }`}>Career Path</p>
+          <p className={`font-semibold text-sm ${
+            theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+          }`}>
             {program.careerPath}
           </p>
         </div>
       </div>
 
       <div className="mb-4">
-        <h4 className="font-semibold text-gray-800 mb-2 text-sm">Skills Gained:</h4>
+        <h4 className={`font-semibold mb-2 text-sm ${
+          theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+        }`}>Skills Gained:</h4>
         <div className="flex flex-wrap gap-2">
           {program.skills.map((skill, index) => (
             <span
@@ -63,4 +89,6 @@ const AlternativeProgramCard = ({ program }) => {
 };
 
 export default AlternativeProgramCard;
+
+
 

@@ -1,27 +1,33 @@
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useTheme } from '../context/ThemeContext';
 
 const AboutUs = () => {
+  const { theme } = useTheme();
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700">
+    <div className={`min-h-screen flex flex-col ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
+    }`}>
       <Navbar />
       
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 animate-fadeIn">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
+          <div className="text-center mb-8 sm:mb-12 animate-fadeIn px-2">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4">
               About MeritVoyage
             </h1>
-            <p className="text-xl text-white/80">
+            <p className="text-base sm:text-lg md:text-xl text-white/80">
               Empowering students to make informed decisions about their future
             </p>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Mission Section */}
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-              <h2 className="text-3xl font-bold text-white mb-4">Our Mission</h2>
-              <p className="text-white/90 text-lg leading-relaxed">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 sm:p-6 md:p-8 border border-white/20 animate-slideIn">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4">Our Mission</h2>
+              <p className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed">
                 MeritVoyage is dedicated to revolutionizing the way students discover and
                 select universities. We leverage cutting-edge artificial intelligence
                 and machine learning technologies to provide personalized, data-driven
@@ -31,9 +37,9 @@ const AboutUs = () => {
             </div>
 
             {/* Vision Section */}
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-              <h2 className="text-3xl font-bold text-white mb-4">Our Vision</h2>
-              <p className="text-white/90 text-lg leading-relaxed">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 sm:p-6 md:p-8 border border-white/20 animate-slideIn">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4">Our Vision</h2>
+              <p className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed">
                 We envision a future where every student has access to comprehensive,
                 unbiased, and intelligent guidance for their higher education journey.
                 By combining advanced AI algorithms with extensive university databases,
@@ -43,8 +49,8 @@ const AboutUs = () => {
             </div>
 
             {/* What We Do Section */}
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-              <h2 className="text-3xl font-bold text-white mb-4">What We Do</h2>
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 sm:p-6 md:p-8 border border-white/20 animate-slideIn">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4">What We Do</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div className="bg-white/5 rounded-lg p-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center mb-4">
@@ -97,15 +103,42 @@ const AboutUs = () => {
             </div>
 
             {/* Team Section */}
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-              <h2 className="text-3xl font-bold text-white mb-4">Our Team</h2>
-              <p className="text-white/90 text-lg leading-relaxed">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 sm:p-6 md:p-8 border border-white/20 animate-slideIn">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 text-center">Our Team</h2>
+              <p className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed mb-6 sm:mb-8 text-center">
                 MeritVoyage is developed by a passionate team of engineers, data scientists,
                 and education experts committed to making higher education accessible
-                and transparent. We combine technical expertise with deep understanding
-                of the educational landscape to deliver solutions that truly make a
-                difference in students' lives.
+                and transparent.
               </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {/* Team Member 1 */}
+                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-5 sm:p-6 border border-white/10 hover:bg-white/10 transition-all text-center">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-2xl sm:text-3xl md:text-4xl">
+                    HH
+                  </div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">Hammad Hussain</h3>
+                  <p className="text-white/70 text-sm sm:text-base">Team Member</p>
+                </div>
+
+                {/* Team Member 2 */}
+                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-5 sm:p-6 border border-white/10 hover:bg-white/10 transition-all text-center">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-2xl sm:text-3xl md:text-4xl">
+                    HU
+                  </div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">Haseeb Ullah</h3>
+                  <p className="text-white/70 text-sm sm:text-base">Team Member</p>
+                </div>
+
+                {/* Team Member 3 */}
+                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-5 sm:p-6 border border-white/10 hover:bg-white/10 transition-all text-center sm:col-span-2 lg:col-span-1">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-2xl sm:text-3xl md:text-4xl">
+                    FK
+                  </div>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">Faisal Khan</h3>
+                  <p className="text-white/70 text-sm sm:text-base">Team Member</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

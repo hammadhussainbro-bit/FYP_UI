@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useTheme } from '../context/ThemeContext';
 
 const Login = () => {
+  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -43,20 +45,24 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700">
+    <div className={`min-h-screen flex flex-col ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
+    }`}>
       <Navbar />
       
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-md w-full">
-          <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-8 border border-white/20 animate-fadeIn">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-4 sm:p-6 md:p-8 border border-white/20 animate-fadeIn">
             <div className="text-center mb-8">
               <img 
                 src="/logo.svg" 
                 alt="MeritVoyage Logo" 
                 className="w-16 h-16 object-contain mx-auto mb-4"
               />
-              <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
-              <p className="text-white/80">Sign in to continue to MeritVoyage</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Welcome Back</h2>
+              <p className="text-white/80 text-sm sm:text-base">Sign in to continue to MeritVoyage</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

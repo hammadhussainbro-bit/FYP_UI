@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useTheme } from '../context/ThemeContext';
 import useRevealOnScroll from '../utils/useRevealOnScroll';
 
 const Stat = ({ label, value }) => (
@@ -41,27 +42,48 @@ const FeatureCard = ({ title, desc, icon, gradient }) => {
 };
 
 const Landing = () => {
+  const { theme } = useTheme();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
+  const [hasCompletedQuestionnaire, setHasCompletedQuestionnaire] = useState(false);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const name = localStorage.getItem('userName') || '';
+    const userEmail = localStorage.getItem('userEmail') || '';
+    
     setIsLoggedIn(loggedIn);
     setUserName(name);
+
+    // Check if user has completed questionnaire
+    if (loggedIn && userEmail) {
+      try {
+        const questionnaires = JSON.parse(localStorage.getItem('questionnaires') || '[]');
+        const userQuestionnaires = questionnaires.filter(q => q.userEmail === userEmail);
+        setHasCompletedQuestionnaire(userQuestionnaires.length > 0);
+      } catch (e) {
+        setHasCompletedQuestionnaire(false);
+      }
+    } else {
+      setHasCompletedQuestionnaire(false);
+    }
   }, []);
 
   const heroRef = useRevealOnScroll();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-700 via-violet-700 to-fuchsia-700">
+    <div className={`min-h-screen flex flex-col ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-b from-indigo-700 via-violet-700 to-fuchsia-700'
+    }`}>
       <Navbar />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 opacity-30 pointer-events-none">
-          <div className="w-[600px] h-[600px] bg-fuchsia-500 rounded-full blur-3xl absolute -top-20 -left-20 floaty" />
-          <div className="w-[500px] h-[500px] bg-indigo-500 rounded-full blur-3xl absolute top-40 right-0 floaty" style={{ animationDelay: '1.2s' }} />
+          <div className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] lg:w-[600px] lg:h-[600px] bg-fuchsia-500 rounded-full blur-3xl absolute -top-20 -left-20 floaty" />
+          <div className="w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] md:w-[450px] md:h-[450px] lg:w-[500px] lg:h-[500px] bg-indigo-500 rounded-full blur-3xl absolute top-40 right-0 floaty" style={{ animationDelay: '1.2s' }} />
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 flex flex-col items-center">
           <div ref={heroRef} className="reveal-init text-center max-w-3xl">
@@ -70,26 +92,32 @@ const Landing = () => {
               Smart University Recommendations
             </div>
             {userName && (
-              <div className="text-5xl md:text-6xl font-black bg-gradient-to-r from-orange-400 via-amber-300 to-white bg-clip-text text-transparent leading-[1.1] tracking-tight mb-2">
+              <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-orange-400 via-amber-300 to-white bg-clip-text text-transparent leading-[1.1] tracking-tight mb-2 px-2">
                 Hello {userName}
               </div>
             )}
-            <h1 className="text-5xl md:text-6xl font-black text-white leading-[1.1] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight px-2">
               Find your perfect <span className="gradient-text">University Match</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/90 mt-4">
+            <p className="text-base sm:text-lg md:text-xl text-white/90 mt-4 px-2">
               Personalized, data-driven guidance to help you decide with confidence.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               {isLoggedIn ? (
-                <>
-                  <Link to="/questionnaire" className="px-7 py-3 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:bg-gray-50 transform-gpu will-change-transform scale-100 hover:scale-[1.05]">
-                    Continue Questionnaire
+                hasCompletedQuestionnaire ? (
+                  <>
+                    <Link to="/explore-universities" className="px-7 py-3 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:bg-gray-50 transform-gpu will-change-transform scale-100 hover:scale-[1.05] w-full sm:w-[220px] text-center">
+                      Explore Universities
+                    </Link>
+                    <Link to="/questionnaire" className="px-7 py-3 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transform-gpu will-change-transform scale-100 hover:scale-[1.05] w-full sm:w-[220px] text-center">
+                      Get Started
+                    </Link>
+                  </>
+                ) : (
+                  <Link to="/questionnaire" className="px-7 py-3 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition">
+                    Get Started
                   </Link>
-                  <Link to="/recommendations" className="px-7 py-3 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transform-gpu will-change-transform scale-100 hover:scale-[1.05]">
-                    View Recommendations
-                  </Link>
-                </>
+                )
               ) : (
                 <>
                   <Link to="/signup" className="px-7 py-3 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition">
@@ -176,23 +204,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto glass rounded-2xl p-8 text-center reveal-init">
-          <h3 className="text-2xl md:text-3xl font-bold text-white">Ready to explore your best-fit universities?</h3>
-          <p className="text-white/80 mt-2">Start your journey now. It takes just a few minutes.</p>
-          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to={isLoggedIn ? '/questionnaire' : '/signup'} className="px-7 py-3 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition">
-              {isLoggedIn ? 'Continue' : 'Get Started for Free'}
-            </Link>
-            {!isLoggedIn && (
-              <Link to="/login" className="px-7 py-3 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transition">
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </div>
