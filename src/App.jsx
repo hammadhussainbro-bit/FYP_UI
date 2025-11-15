@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { FormProvider } from './context/FormContext';
 import { ThemeProvider } from './context/ThemeContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import AIChatBox from './components/AIChatBox';
 import ScrollToTop from './components/ScrollToTop';
 import Landing from './pages/Landing';
@@ -28,12 +29,13 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <FormProvider>
-        <Router>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Landing />} />
+    <ErrorBoundary>
+      <ThemeProvider>
+        <FormProvider>
+          <Router>
+            <ScrollToTop />
+            <Routes>
+              <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/about" element={<AboutUs />} />
@@ -117,10 +119,11 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-          <AIChatBox />
-        </Router>
-      </FormProvider>
-    </ThemeProvider>
+            <AIChatBox />
+          </Router>
+        </FormProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

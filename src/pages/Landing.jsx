@@ -46,28 +46,61 @@ const Landing = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const [hasCompletedQuestionnaire, setHasCompletedQuestionnaire] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const name = localStorage.getItem('userName') || '';
-    const userEmail = localStorage.getItem('userEmail') || '';
-    
-    setIsLoggedIn(loggedIn);
-    setUserName(name);
+    try {
+      const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const name = localStorage.getItem('userName') || '';
+      const userEmail = localStorage.getItem('userEmail') || '';
+      
+      setIsLoggedIn(loggedIn);
+      setUserName(name);
 
-    // Check if user has completed questionnaire
-    if (loggedIn && userEmail) {
-      try {
-        const questionnaires = JSON.parse(localStorage.getItem('questionnaires') || '[]');
-        const userQuestionnaires = questionnaires.filter(q => q.userEmail === userEmail);
-        setHasCompletedQuestionnaire(userQuestionnaires.length > 0);
-      } catch (e) {
+      // Check if user has completed questionnaire
+      if (loggedIn && userEmail) {
+        try {
+          const questionnaires = JSON.parse(localStorage.getItem('questionnaires') || '[]');
+          const userQuestionnaires = questionnaires.filter(q => q.userEmail === userEmail);
+          setHasCompletedQuestionnaire(userQuestionnaires.length > 0);
+        } catch (e) {
+          console.error('Error checking questionnaire:', e);
+          setHasCompletedQuestionnaire(false);
+        }
+      } else {
         setHasCompletedQuestionnaire(false);
       }
-    } else {
-      setHasCompletedQuestionnaire(false);
+    } catch (err) {
+      console.error('Error in Landing useEffect:', err);
+      setError('Failed to load page data');
     }
   }, []);
+
+  // Safety check for theme
+  if (!theme) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const heroRef = useRevealOnScroll();
 

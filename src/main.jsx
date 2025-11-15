@@ -4,10 +4,20 @@ import './index.css'
 import App from './App.jsx'
 
 // Initialize theme on load - default to dark
-const savedTheme = localStorage.getItem('theme') || 'dark';
-document.documentElement.classList.add(savedTheme);
+try {
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.classList.add(savedTheme);
+} catch (e) {
+  // If localStorage is not available, default to dark
+  document.documentElement.classList.add('dark');
+}
 
-createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+createRoot(rootElement).render(
   <StrictMode>
     <App />
   </StrictMode>,

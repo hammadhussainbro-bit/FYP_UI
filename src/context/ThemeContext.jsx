@@ -13,18 +13,30 @@ export const useTheme = () => {
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     // Check localStorage first, then default to dark
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme;
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          return savedTheme;
+        }
+      }
+    } catch (e) {
+      console.error('Error accessing localStorage:', e);
     }
     return 'dark'; // Default to dark mode
   });
 
   useEffect(() => {
     // Update document class and localStorage
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    try {
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(theme);
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('theme', theme);
+      }
+    } catch (e) {
+      console.error('Error setting theme:', e);
+    }
   }, [theme]);
 
   const toggleTheme = () => {

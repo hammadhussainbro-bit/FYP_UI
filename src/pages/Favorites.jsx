@@ -6,23 +6,6 @@ import RecommendationCard from '../components/RecommendationCard';
 import { useTheme } from '../context/ThemeContext';
 import { getFavorites, removeFromFavorites } from '../utils/storage';
 
-// Lazy load jsPDF to prevent build issues
-let jsPDF, autoTable;
-const loadPDFLibs = async () => {
-  if (!jsPDF) {
-    try {
-      const jsPDFModule = await import('jspdf');
-      jsPDF = jsPDFModule.jsPDF || jsPDFModule.default;
-      const autoTableModule = await import('jspdf-autotable');
-      autoTable = autoTableModule.default;
-    } catch (error) {
-      console.error('Error loading PDF libraries:', error);
-      return false;
-    }
-  }
-  return true;
-};
-
 const Favorites = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -64,114 +47,45 @@ const Favorites = () => {
     }
   };
 
-  const filteredAndSorted = (favorites || [])
-    .filter(fav => {
-      if (!fav || !fav.name) return false;
-      if (filter === 'all') return true;
-      if (filter === 'top') return (fav.matchScore || 0) >= 90;
-      if (filter === 'backup') return (fav.matchScore || 0) < 90;
-      return true;
-    })
-    .sort((a, b) => {
-      try {
-        if (sortBy === 'matchScore') {
-          return (b.matchScore || 0) - (a.matchScore || 0);
-        }
-        if (sortBy === 'name') {
-          return (a.name || '').localeCompare(b.name || '');
-        }
-        if (sortBy === 'fee') {
-          const getFee = (str) => {
-            if (!str) return 0;
-            const match = String(str).match(/(\d[\d,]*)/);
-            return match ? parseInt(match[1].replace(/,/g, ''), 10) : 0;
-          };
-          return getFee(a.tuitionFee) - getFee(b.tuitionFee);
-        }
-        return 0;
-      } catch (err) {
-        console.error('Error sorting favorites:', err);
-        return 0;
-      }
-    });
-
-  const handleExportPDF = async () => {
+  // Safely filter and sort favorites
+  const filteredAndSorted = (() => {
     try {
-      const loaded = await loadPDFLibs();
-      if (!loaded) {
-        alert('PDF export is not available. Please try again later.');
-        return;
-      }
-
-      const Doc = jsPDF;
-      const doc = new Doc();
-      doc.setFillColor(37, 99, 235);
-      doc.rect(0, 0, 210, 25, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.text('MeritVoyage - My Favorites', 10, 16);
-
-      let y = 35;
-      doc.setFontSize(12);
-      doc.setTextColor(0, 0, 0);
-      doc.text(`Total Favorites: ${filteredAndSorted.length}`, 10, y);
-      y += 10;
-
-      if (filteredAndSorted.length > 0) {
-        autoTable(doc, {
-          startY: y,
-          head: [['University', 'Location', 'Program', 'Match %', 'Rank', 'Tuition']],
-          body: filteredAndSorted.map(u => [
-            u.name || 'N/A', 
-            u.location || 'N/A', 
-            u.program || 'N/A', 
-            `${u.matchScore || 0}%`, 
-            u.rank || 'N/A', 
-            u.tuitionFee || 'N/A',
-          ]),
-          styles: { fontSize: 9 },
-          headStyles: { fillColor: [37, 99, 235] },
+      return (favorites || [])
+        .filter(fav => {
+          if (!fav || !fav.name) return false;
+          if (filter === 'all') return true;
+          if (filter === 'top') return (fav.matchScore || 0) >= 90;
+          if (filter === 'backup') return (fav.matchScore || 0) < 90;
+          return true;
+        })
+        .sort((a, b) => {
+          try {
+            if (sortBy === 'matchScore') {
+              return (b.matchScore || 0) - (a.matchScore || 0);
+            }
+            if (sortBy === 'name') {
+              return (a.name || '').localeCompare(b.name || '');
+            }
+            if (sortBy === 'fee') {
+              const getFee = (str) => {
+                if (!str) return 0;
+                const match = String(str).match(/(\d[\d,]*)/);
+                return match ? parseInt(match[1].replace(/,/g, ''), 10) : 0;
+              };
+              return getFee(a.tuitionFee) - getFee(b.tuitionFee);
+            }
+            return 0;
+          } catch (err) {
+            console.error('Error sorting favorites:', err);
+            return 0;
+          }
         });
-      }
-
-      doc.save('MeritVoyage_Favorites.pdf');
     } catch (err) {
-      console.error('Error exporting PDF:', err);
-      alert('Error generating PDF. Please try again.');
+      console.error('Error filtering/sorting favorites:', err);
+      return [];
     }
-  };
+  })();
 
-  const handleExportCSV = () => {
-    try {
-      const headers = ['University', 'Location', 'Program', 'Match Score', 'Rank', 'Tuition Fee', 'Entry Test'];
-      const rows = filteredAndSorted.map(u => [
-        u.name || 'N/A', 
-        u.location || 'N/A', 
-        u.program || 'N/A', 
-        u.matchScore || 0, 
-        u.rank || 'N/A', 
-        u.tuitionFee || 'N/A', 
-        u.entryTestRequired || 'N/A',
-      ]);
-      
-      const csv = [headers, ...rows].map(row => 
-        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-      ).join('\n');
-      
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'MeritVoyage_Favorites.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Error exporting CSV:', err);
-      alert('Error generating CSV. Please try again.');
-    }
-  };
 
   // Safety check for theme
   if (!theme) {
@@ -225,49 +139,35 @@ const Favorites = () => {
           {/* Filters and Sort - Only show if not loading */}
           {!loading && (
             <div className="mb-6 flex flex-col gap-4 w-full">
-            <div className="flex flex-col sm:flex-row gap-3 w-full">
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className={`flex-1 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
-                  theme === 'dark'
-                    ? 'bg-gray-800 text-gray-200 border border-gray-700'
-                    : 'bg-white/90 text-gray-800 border border-white/30'
-                }`}
-              >
-                <option value="all">All Favorites</option>
-                <option value="top">Top Matches (90%+)</option>
-                <option value="backup">Backup Options</option>
-              </select>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className={`flex-1 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
-                  theme === 'dark'
-                    ? 'bg-gray-800 text-gray-200 border border-gray-700'
-                    : 'bg-white/90 text-gray-800 border border-white/30'
-                }`}
-              >
-                <option value="matchScore">Sort by Match Score</option>
-                <option value="name">Sort by Name</option>
-                <option value="fee">Sort by Fee</option>
-              </select>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  className={`flex-1 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 text-gray-200 border border-gray-700'
+                      : 'bg-white/90 text-gray-800 border border-white/30'
+                  }`}
+                >
+                  <option value="all">All Favorites</option>
+                  <option value="top">Top Matches (90%+)</option>
+                  <option value="backup">Backup Options</option>
+                </select>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className={`flex-1 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 text-gray-200 border border-gray-700'
+                      : 'bg-white/90 text-gray-800 border border-white/30'
+                  }`}
+                >
+                  <option value="matchScore">Sort by Match Score</option>
+                  <option value="name">Sort by Name</option>
+                  <option value="fee">Sort by Fee</option>
+                </select>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full">
-              <button
-                onClick={handleExportPDF}
-                className="flex-1 sm:flex-none px-4 py-2.5 sm:py-2 bg-white text-blue-600 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all touch-manipulation min-h-[44px] flex items-center justify-center"
-              >
-                Export PDF
-              </button>
-              <button
-                onClick={handleExportCSV}
-                className="flex-1 sm:flex-none px-4 py-2.5 sm:py-2 bg-white text-indigo-600 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all touch-manipulation min-h-[44px] flex items-center justify-center"
-              >
-                Export CSV
-              </button>
-            </div>
-          </div>
           )}
 
           {!loading && filteredAndSorted.length === 0 ? (

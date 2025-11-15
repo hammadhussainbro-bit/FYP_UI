@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { createPortal } from 'react-dom';
 
@@ -9,107 +9,225 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0, left: 'auto', width: 224 });
+  
+  // Declare all refs and state variables BEFORE using them in useEffect
+  const userMenuRef = useRef(null);
+  const userMenuTimeoutRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false);
+  
+  // Get user info safely
+  const isLoggedIn = typeof window !== 'undefined' ? (localStorage.getItem('isLoggedIn') === 'true') : false;
+  const userName = typeof window !== 'undefined' ? (localStorage.getItem('userName') || 'User') : 'User';
+  
+  // Declare all functions BEFORE using them in useEffect hooks
+  // Clear timeout helper - memoized to prevent unnecessary re-renders
+  const clearUserMenuTimeout = useCallback(() => {
+    if (userMenuTimeoutRef.current) {
+      clearTimeout(userMenuTimeoutRef.current);
+      userMenuTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Handle mouse enter - open immediately and clear any pending close
+  const handleUserMenuEnter = () => {
+    clearUserMenuTimeout();
+    // Always open on hover - works on both desktop and mobile
+    setIsUserMenuOpen(true);
+  };
+  
+  // Handle mouse leave - close after delay
+  const handleUserMenuLeave = () => {
+    clearUserMenuTimeout();
+    // Close after delay to allow moving mouse to dropdown
+    userMenuTimeoutRef.current = setTimeout(() => {
+      setIsUserMenuOpen(false);
+    }, 200);
+  };
+
+  // Handle click - toggle menu
+  const handleUserMenuClick = (e) => {
+    e?.stopPropagation();
+    // Toggle on click for both mobile and desktop
+    setIsUserMenuOpen(prev => !prev);
+  };
+
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+    }
+    navigate('/');
+    setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
+  };
+  
+  // Safety check for theme
+  if (!theme) {
+    return (
+      <nav className="bg-gray-900/90 backdrop-blur-md border-b border-gray-700 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="text-white">Loading...</div>
+        </div>
+      </nav>
+    );
+  }
   
   // Calculate dropdown position - handle portrait/landscape orientation
   useEffect(() => {
-    if (isUserMenuOpen && userMenuRef.current) {
+    if (isUserMenuOpen && userMenuRef.current && typeof window !== 'undefined') {
       const updatePosition = () => {
         if (!userMenuRef.current) return;
         
-        const rect = userMenuRef.current.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const scrollY = window.scrollY || window.pageYOffset;
-        const dropdownWidth = 224; // minWidth from style
-        const estimatedDropdownHeight = 500; // estimated max height
-        const spacing = 8;
-        const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top') || '0', 10) || 0;
-        
-        // Calculate right position - ensure it stays within viewport
-        let right = viewportWidth - rect.right;
-        
-        // If dropdown would go off-screen on the right, adjust to left side
-        if (right < spacing) {
-          right = spacing;
-        } else if (right + dropdownWidth > viewportWidth - spacing) {
-          right = Math.max(spacing, viewportWidth - dropdownWidth - spacing);
+        try {
+          requestAnimationFrame(() => {
+            if (!userMenuRef.current) return;
+            
+            const rect = userMenuRef.current.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const scrollY = window.scrollY || window.pageYOffset;
+            const isPortraitMode = viewportHeight > viewportWidth;
+            const isMobileDevice = viewportWidth < 768;
+            
+            // For mobile portrait, use full width minus padding
+            const dropdownWidth = (isMobileDevice && isPortraitMode) 
+              ? Math.min(viewportWidth - 16, 280) 
+              : 224;
+            
+            const estimatedDropdownHeight = (isMobileDevice && isPortraitMode) ? 400 : 500;
+            const spacing = isMobileDevice ? 8 : 8;
+            const safeAreaTop = parseInt(
+              getComputedStyle(document.documentElement).getPropertyValue('padding-top') || 
+              window.getComputedStyle(document.documentElement).paddingTop || 
+              '0', 
+              10
+            ) || 0;
+            
+            // For mobile portrait, center the dropdown or align to left with padding
+            let right, left;
+            if (isMobileDevice && isPortraitMode) {
+              // Center horizontally or align to left edge with padding
+              left = 8;
+              right = 'auto';
+            } else {
+              // Desktop/landscape: align to right
+              right = viewportWidth - rect.right;
+              if (right < spacing) {
+                right = spacing;
+              } else if (right + dropdownWidth > viewportWidth - spacing) {
+                right = Math.max(spacing, viewportWidth - dropdownWidth - spacing);
+              }
+              left = 'auto';
+            }
+            
+            // Calculate top position
+            let top = rect.bottom + scrollY + spacing;
+            
+            // Check available space below and above
+            const spaceBelow = viewportHeight - rect.bottom;
+            const spaceAbove = rect.top - safeAreaTop;
+            
+            // For mobile portrait, always show below with better spacing
+            if (isMobileDevice && isPortraitMode) {
+              top = rect.bottom + scrollY + spacing;
+              // Ensure it doesn't go off screen
+              const maxHeight = viewportHeight - rect.bottom - spacing - 20;
+              if (maxHeight < 200) {
+                // Not enough space below, show above
+                top = rect.top + scrollY - Math.min(estimatedDropdownHeight, spaceAbove - spacing);
+              }
+            } else {
+              // Desktop/landscape logic
+              if (spaceBelow < estimatedDropdownHeight && spaceAbove > estimatedDropdownHeight) {
+                top = rect.top + scrollY - estimatedDropdownHeight - spacing;
+              } else if (spaceBelow < estimatedDropdownHeight) {
+                top = rect.bottom + scrollY + spacing;
+              }
+            }
+            
+            // Ensure dropdown doesn't go off top of viewport
+            const minTop = scrollY + safeAreaTop + spacing;
+            if (top < minTop) {
+              top = minTop;
+            }
+            
+            // Ensure dropdown doesn't go off bottom of viewport
+            const maxTop = scrollY + viewportHeight - spacing;
+            if (top + estimatedDropdownHeight > maxTop) {
+              top = Math.max(minTop, maxTop - estimatedDropdownHeight);
+            }
+            
+            setDropdownPosition({ top, right, left, width: dropdownWidth });
+          });
+        } catch (err) {
+          console.error('Error updating dropdown position:', err);
         }
-        
-        // Calculate top position
-        let top = rect.bottom + scrollY + spacing;
-        
-        // Check available space below and above
-        const spaceBelow = viewportHeight - rect.bottom;
-        const spaceAbove = rect.top - safeAreaTop;
-        
-        // If not enough space below but enough above, show above button
-        if (spaceBelow < estimatedDropdownHeight && spaceAbove > estimatedDropdownHeight) {
-          top = rect.top + scrollY - estimatedDropdownHeight - spacing;
-        } else if (spaceBelow < estimatedDropdownHeight) {
-          // Not enough space either way, position below but limit height
-          top = rect.bottom + scrollY + spacing;
-        }
-        
-        // Ensure dropdown doesn't go off top of viewport (account for safe area)
-        const minTop = scrollY + safeAreaTop + spacing;
-        if (top < minTop) {
-          top = minTop;
-        }
-        
-        // Ensure dropdown doesn't go off bottom of viewport
-        const maxTop = scrollY + viewportHeight - spacing;
-        if (top + estimatedDropdownHeight > maxTop) {
-          top = Math.max(minTop, maxTop - estimatedDropdownHeight);
-        }
-        
-        setDropdownPosition({ top, right });
       };
       
-      // Initial position calculation
-      updatePosition();
+      // Initial position calculation with delay for mobile
+      const timeoutId = setTimeout(updatePosition, isMobile ? 50 : 10);
       
       // Update on resize and orientation change
       const handleResize = () => {
-        requestAnimationFrame(updatePosition);
+        updatePosition();
       };
       
       const handleOrientationChange = () => {
-        // Delay to allow browser to complete orientation change
         setTimeout(() => {
-          requestAnimationFrame(updatePosition);
-        }, 150);
+          updatePosition();
+        }, 200);
       };
       
-      window.addEventListener('resize', handleResize);
+      window.addEventListener('resize', handleResize, { passive: true });
       window.addEventListener('orientationchange', handleOrientationChange);
       window.addEventListener('scroll', updatePosition, { passive: true });
       
       return () => {
+        clearTimeout(timeoutId);
         window.removeEventListener('resize', handleResize);
         window.removeEventListener('orientationchange', handleOrientationChange);
         window.removeEventListener('scroll', updatePosition);
       };
     }
-  }, [isUserMenuOpen]);
-  const userMenuRef = useRef(null);
-  const userMenuTimeoutRef = useRef(null);
-  const mobileMenuRef = useRef(null);
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userName = localStorage.getItem('userName') || 'User';
-  const [isMobile, setIsMobile] = useState(false);
+  }, [isUserMenuOpen, isMobile, isPortrait]);
 
-  // Detect mobile device
+  // Detect mobile device and orientation
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    if (typeof window === 'undefined') return;
+    
+    const checkMobileAndOrientation = () => {
+      try {
+        const width = window.innerWidth || 1024;
+        const height = window.innerHeight || 768;
+        const isMobileDevice = width < 768 || (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent || ''));
+        const isPortraitMode = height > width;
+        
+        setIsMobile(isMobileDevice);
+        setIsPortrait(isPortraitMode);
+      } catch (err) {
+        console.error('Error checking mobile/orientation:', err);
+        setIsMobile(false);
+        setIsPortrait(false);
+      }
     };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    window.addEventListener('orientationchange', checkMobile);
+    
+    // Initial check
+    checkMobileAndOrientation();
+    
+    // Set up listeners
+    window.addEventListener('resize', checkMobileAndOrientation);
+    const orientationHandler = () => {
+      setTimeout(checkMobileAndOrientation, 100);
+    };
+    window.addEventListener('orientationchange', orientationHandler);
+    
     return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('orientationchange', checkMobile);
+      window.removeEventListener('resize', checkMobileAndOrientation);
+      window.removeEventListener('orientationchange', orientationHandler);
     };
   }, []);
 
@@ -153,54 +271,7 @@ const Navbar = () => {
         document.removeEventListener('touchstart', handleClickOutside);
       };
     }
-  }, [isMenuOpen, isUserMenuOpen]);
-
-  // Clear timeout helper
-  const clearUserMenuTimeout = () => {
-    if (userMenuTimeoutRef.current) {
-      clearTimeout(userMenuTimeoutRef.current);
-      userMenuTimeoutRef.current = null;
-    }
-  };
-
-  // Handle mouse enter - open immediately and clear any pending close
-  const handleUserMenuEnter = () => {
-    clearUserMenuTimeout();
-    // Always open on hover - works on both desktop and mobile
-    console.log('Hover detected - opening menu');
-    setIsUserMenuOpen(true);
-  };
-  
-  // Force open for testing
-  const forceOpenMenu = () => {
-    console.log('Force opening menu');
-    setIsUserMenuOpen(true);
-  };
-
-  // Handle mouse leave - close after delay
-  const handleUserMenuLeave = () => {
-    clearUserMenuTimeout();
-    // Close after delay to allow moving mouse to dropdown
-    userMenuTimeoutRef.current = setTimeout(() => {
-      setIsUserMenuOpen(false);
-    }, 200);
-  };
-
-  // Handle click - toggle menu
-  const handleUserMenuClick = (e) => {
-    e?.stopPropagation();
-    // Toggle on click for both mobile and desktop
-    setIsUserMenuOpen(prev => !prev);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userName');
-    navigate('/');
-    setIsMenuOpen(false);
-    setIsUserMenuOpen(false);
-  };
+  }, [isMenuOpen, isUserMenuOpen, clearUserMenuTimeout]);
 
   return (
     <nav className={`${
@@ -277,7 +348,6 @@ const Navbar = () => {
                 ref={userMenuRef} 
                 style={{ zIndex: 99999, position: 'relative' }}
                 onMouseEnter={() => {
-                  console.log('Parent div hover');
                   handleUserMenuEnter();
                 }}
                 onMouseLeave={handleUserMenuLeave}
@@ -286,30 +356,26 @@ const Navbar = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Button clicked, current state:', isUserMenuOpen);
-                    setIsUserMenuOpen(prev => {
-                      const newState = !prev;
-                      console.log('Menu state changed to:', newState);
-                      return newState;
-                    });
+                    setIsUserMenuOpen(prev => !prev);
                   }}
                   onMouseEnter={() => {
-                    console.log('Button hover');
                     handleUserMenuEnter();
                   }}
-                  className="flex items-center space-x-1.5 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all touch-manipulation"
+                  className={`flex items-center space-x-1.5 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all touch-manipulation min-h-[44px] ${(isMobile && isPortrait) ? 'min-w-[44px]' : ''}`}
                   aria-label="User menu"
                   aria-expanded={isUserMenuOpen}
                   type="button"
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-semibold text-xs sm:text-sm">
+                  <div className={`${isMobile && isPortrait ? 'w-8 h-8' : 'w-7 h-7 sm:w-8 sm:h-8'} bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0`}>
+                    <span className={`text-white font-semibold ${isMobile && isPortrait ? 'text-sm' : 'text-xs sm:text-sm'}`}>
                       {userName.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <span className={`font-medium text-xs sm:text-sm md:text-base truncate max-w-[100px] sm:max-w-none ${
-                    theme === 'dark' ? 'text-gray-200' : 'text-white'
-                  }`}>{userName}</span>
+                  {(!isMobile || !isPortrait) && (
+                    <span className={`font-medium text-xs sm:text-sm md:text-base truncate max-w-[100px] sm:max-w-none ${
+                      theme === 'dark' ? 'text-gray-200' : 'text-white'
+                    }`}>{userName}</span>
+                  )}
                   <svg
                     className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform flex-shrink-0 ${
                       theme === 'dark' ? 'text-gray-200' : 'text-white'
@@ -332,40 +398,48 @@ const Navbar = () => {
                   <div
                     onMouseEnter={handleUserMenuEnter}
                     onMouseLeave={handleUserMenuLeave}
+                    onClick={(e) => {
+                      // Prevent closing when clicking inside dropdown on mobile
+                      if (isMobile) {
+                        e.stopPropagation();
+                      }
+                    }}
                     className={`rounded-xl shadow-2xl overflow-hidden ${
                       theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                    }`}
+                    } ${(isMobile && isPortrait) ? 'w-[calc(100vw-16px)] max-w-[280px]' : ''}`}
                     style={{ 
                       zIndex: 99999,
                       position: 'fixed',
                       top: `${dropdownPosition.top}px`,
-                      right: `${dropdownPosition.right}px`,
-                      left: 'auto',
+                      right: dropdownPosition.right !== undefined ? `${dropdownPosition.right}px` : 'auto',
+                      left: dropdownPosition.left !== undefined ? (typeof dropdownPosition.left === 'string' ? dropdownPosition.left : `${dropdownPosition.left}px`) : 'auto',
                       backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
                       border: theme === 'dark' ? '2px solid #374151' : '2px solid #3b82f6',
                       boxShadow: theme === 'dark' 
                         ? '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3)'
                         : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                      minWidth: '224px',
-                      width: '224px',
-                      maxWidth: 'calc(100vw - 16px)',
-                      maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 100px)',
+                      minWidth: (isMobile && isPortrait) ? 'auto' : '224px',
+                      width: dropdownPosition.width ? `${dropdownPosition.width}px` : ((isMobile && isPortrait) ? 'calc(100vw - 16px)' : '224px'),
+                      maxWidth: (isMobile && isPortrait) ? '280px' : 'calc(100vw - 16px)',
+                      maxHeight: (isMobile && isPortrait) ? 'calc(100vh - 120px)' : 'calc(100vh - 100px)',
                       overflowY: 'auto',
                       overflowX: 'hidden',
                       opacity: 1,
                       visibility: 'visible',
                       display: 'block',
                       pointerEvents: 'auto',
-                      WebkitOverflowScrolling: 'touch'
+                      WebkitOverflowScrolling: 'touch',
+                      transform: 'translateZ(0)', // Force hardware acceleration
+                      willChange: 'transform'
                     }}
                   >
-                    <div className="py-2">
+                    <div className={`py-2 ${isMobile && isPortrait ? 'py-1' : ''}`}>
                       <Link
                         to="/questionnaire"
-                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                        className={`flex items-center px-4 ${isMobile && isPortrait ? 'py-2.5' : 'py-3'} transition-colors cursor-pointer touch-manipulation min-h-[44px] ${
                           theme === 'dark' 
-                            ? 'text-gray-200 hover:bg-gray-700' 
-                            : 'text-gray-700 hover:bg-blue-50'
+                            ? 'text-gray-200 hover:bg-gray-700 active:bg-gray-600' 
+                            : 'text-gray-700 hover:bg-blue-50 active:bg-blue-100'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -389,10 +463,10 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/documents"
-                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                        className={`flex items-center px-4 ${isMobile && isPortrait ? 'py-2.5' : 'py-3'} transition-colors cursor-pointer touch-manipulation min-h-[44px] ${
                           theme === 'dark' 
-                            ? 'text-gray-200 hover:bg-gray-700' 
-                            : 'text-gray-700 hover:bg-blue-50'
+                            ? 'text-gray-200 hover:bg-gray-700 active:bg-gray-600' 
+                            : 'text-gray-700 hover:bg-blue-50 active:bg-blue-100'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -416,10 +490,10 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/recommendations"
-                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                        className={`flex items-center px-4 ${isMobile && isPortrait ? 'py-2.5' : 'py-3'} transition-colors cursor-pointer touch-manipulation min-h-[44px] ${
                           theme === 'dark' 
-                            ? 'text-gray-200 hover:bg-gray-700' 
-                            : 'text-gray-700 hover:bg-blue-50'
+                            ? 'text-gray-200 hover:bg-gray-700 active:bg-gray-600' 
+                            : 'text-gray-700 hover:bg-blue-50 active:bg-blue-100'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -443,10 +517,10 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/favorites"
-                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                        className={`flex items-center px-4 ${isMobile && isPortrait ? 'py-2.5' : 'py-3'} transition-colors cursor-pointer touch-manipulation min-h-[44px] ${
                           theme === 'dark' 
-                            ? 'text-gray-200 hover:bg-gray-700' 
-                            : 'text-gray-700 hover:bg-blue-50'
+                            ? 'text-gray-200 hover:bg-gray-700 active:bg-gray-600' 
+                            : 'text-gray-700 hover:bg-blue-50 active:bg-blue-100'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -470,10 +544,10 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/deadlines"
-                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                        className={`flex items-center px-4 ${isMobile && isPortrait ? 'py-2.5' : 'py-3'} transition-colors cursor-pointer touch-manipulation min-h-[44px] ${
                           theme === 'dark' 
-                            ? 'text-gray-200 hover:bg-gray-700' 
-                            : 'text-gray-700 hover:bg-blue-50'
+                            ? 'text-gray-200 hover:bg-gray-700 active:bg-gray-600' 
+                            : 'text-gray-700 hover:bg-blue-50 active:bg-blue-100'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -497,10 +571,10 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/update-profile"
-                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                        className={`flex items-center px-4 ${isMobile && isPortrait ? 'py-2.5' : 'py-3'} transition-colors cursor-pointer touch-manipulation min-h-[44px] ${
                           theme === 'dark' 
-                            ? 'text-gray-200 hover:bg-gray-700' 
-                            : 'text-gray-700 hover:bg-blue-50'
+                            ? 'text-gray-200 hover:bg-gray-700 active:bg-gray-600' 
+                            : 'text-gray-700 hover:bg-blue-50 active:bg-blue-100'
                         }`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -527,10 +601,10 @@ const Navbar = () => {
                       }`}></div>
                       <button
                         onClick={handleLogout}
-                        className={`w-full flex items-center px-4 py-3 transition-colors ${
+                        className={`w-full flex items-center px-4 ${isMobile && isPortrait ? 'py-2.5' : 'py-3'} transition-colors touch-manipulation min-h-[44px] ${
                           theme === 'dark' 
-                            ? 'text-red-400 hover:bg-gray-700' 
-                            : 'text-red-600 hover:bg-red-50'
+                            ? 'text-red-400 hover:bg-gray-700 active:bg-gray-600' 
+                            : 'text-red-600 hover:bg-red-50 active:bg-red-100'
                         }`}
                       >
                         <svg
