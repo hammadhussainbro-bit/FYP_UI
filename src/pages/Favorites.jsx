@@ -3,11 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import RecommendationCard from '../components/RecommendationCard';
-import BackupCard from '../components/BackupCard';
 import { useTheme } from '../context/ThemeContext';
 import { getFavorites, removeFromFavorites } from '../utils/storage';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+
+// Lazy load jsPDF to prevent build issues
+let jsPDF, autoTable;
+const loadPDFLibs = async () => {
+  if (!jsPDF) {
+    try {
+      const jsPDFModule = await import('jspdf');
+      jsPDF = jsPDFModule.jsPDF || jsPDFModule.default;
+      const autoTableModule = await import('jspdf-autotable');
+      autoTable = autoTableModule.default;
+    } catch (error) {
+      console.error('Error loading PDF libraries:', error);
+      return false;
+    }
+  }
+  return true;
+};
 
 const Favorites = () => {
   const navigate = useNavigate();
@@ -15,79 +29,158 @@ const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('matchScore');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const favs = getFavorites();
-    setFavorites(favs);
+    try {
+      const favs = getFavorites();
+      // Ensure favorites is an array and filter out any invalid entries
+      const validFavorites = Array.isArray(favs) 
+        ? favs.filter(fav => fav && fav.name && fav.program)
+        : [];
+      setFavorites(validFavorites);
+      setError(null);
+    } catch (err) {
+      console.error('Error loading favorites:', err);
+      setError('Failed to load favorites. Please try refreshing the page.');
+      setFavorites([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const handleRemove = (university) => {
-    removeFromFavorites(university);
-    setFavorites(getFavorites());
+    try {
+      removeFromFavorites(university);
+      const favs = getFavorites();
+      const validFavorites = Array.isArray(favs) 
+        ? favs.filter(fav => fav && fav.name && fav.program)
+        : [];
+      setFavorites(validFavorites);
+    } catch (err) {
+      console.error('Error removing favorite:', err);
+      setError('Failed to remove favorite. Please try again.');
+    }
   };
 
-  const filteredAndSorted = favorites
+  const filteredAndSorted = (favorites || [])
     .filter(fav => {
+      if (!fav || !fav.name) return false;
       if (filter === 'all') return true;
-      if (filter === 'top') return fav.matchScore >= 90;
-      if (filter === 'backup') return fav.matchScore < 90;
+      if (filter === 'top') return (fav.matchScore || 0) >= 90;
+      if (filter === 'backup') return (fav.matchScore || 0) < 90;
       return true;
     })
     .sort((a, b) => {
-      if (sortBy === 'matchScore') return (b.matchScore || 0) - (a.matchScore || 0);
-      if (sortBy === 'name') return a.name.localeCompare(b.name);
-      if (sortBy === 'fee') {
-        const getFee = (str) => {
-          const match = str?.match(/(\d[\d,]*)/);
-          return match ? parseInt(match[1].replace(/,/g, '')) : 0;
-        };
-        return getFee(a.tuitionFee) - getFee(b.tuitionFee);
+      try {
+        if (sortBy === 'matchScore') {
+          return (b.matchScore || 0) - (a.matchScore || 0);
+        }
+        if (sortBy === 'name') {
+          return (a.name || '').localeCompare(b.name || '');
+        }
+        if (sortBy === 'fee') {
+          const getFee = (str) => {
+            if (!str) return 0;
+            const match = String(str).match(/(\d[\d,]*)/);
+            return match ? parseInt(match[1].replace(/,/g, ''), 10) : 0;
+          };
+          return getFee(a.tuitionFee) - getFee(b.tuitionFee);
+        }
+        return 0;
+      } catch (err) {
+        console.error('Error sorting favorites:', err);
+        return 0;
       }
-      return 0;
     });
 
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-    doc.setFillColor(37, 99, 235);
-    doc.rect(0, 0, 210, 25, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
-    doc.text('MeritVoyage - My Favorites', 10, 16);
+  const handleExportPDF = async () => {
+    try {
+      const loaded = await loadPDFLibs();
+      if (!loaded) {
+        alert('PDF export is not available. Please try again later.');
+        return;
+      }
 
-    let y = 35;
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Total Favorites: ${favorites.length}`, 10, y);
-    y += 10;
+      const Doc = jsPDF;
+      const doc = new Doc();
+      doc.setFillColor(37, 99, 235);
+      doc.rect(0, 0, 210, 25, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.text('MeritVoyage - My Favorites', 10, 16);
 
-    autoTable(doc, {
-      startY: y,
-      head: [['University', 'Location', 'Program', 'Match %', 'Rank', 'Tuition']],
-      body: filteredAndSorted.map(u => [
-        u.name, u.location, u.program, `${u.matchScore}%`, u.rank, u.tuitionFee,
-      ]),
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [37, 99, 235] },
-    });
+      let y = 35;
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Total Favorites: ${filteredAndSorted.length}`, 10, y);
+      y += 10;
 
-    doc.save('MeritVoyage_Favorites.pdf');
+      if (filteredAndSorted.length > 0) {
+        autoTable(doc, {
+          startY: y,
+          head: [['University', 'Location', 'Program', 'Match %', 'Rank', 'Tuition']],
+          body: filteredAndSorted.map(u => [
+            u.name || 'N/A', 
+            u.location || 'N/A', 
+            u.program || 'N/A', 
+            `${u.matchScore || 0}%`, 
+            u.rank || 'N/A', 
+            u.tuitionFee || 'N/A',
+          ]),
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [37, 99, 235] },
+        });
+      }
+
+      doc.save('MeritVoyage_Favorites.pdf');
+    } catch (err) {
+      console.error('Error exporting PDF:', err);
+      alert('Error generating PDF. Please try again.');
+    }
   };
 
   const handleExportCSV = () => {
-    const headers = ['University', 'Location', 'Program', 'Match Score', 'Rank', 'Tuition Fee', 'Entry Test'];
-    const rows = filteredAndSorted.map(u => [
-      u.name, u.location, u.program, u.matchScore, u.rank, u.tuitionFee, u.entryTestRequired || 'N/A',
-    ]);
-    
-    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'MeritVoyage_Favorites.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const headers = ['University', 'Location', 'Program', 'Match Score', 'Rank', 'Tuition Fee', 'Entry Test'];
+      const rows = filteredAndSorted.map(u => [
+        u.name || 'N/A', 
+        u.location || 'N/A', 
+        u.program || 'N/A', 
+        u.matchScore || 0, 
+        u.rank || 'N/A', 
+        u.tuitionFee || 'N/A', 
+        u.entryTestRequired || 'N/A',
+      ]);
+      
+      const csv = [headers, ...rows].map(row => 
+        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+      ).join('\n');
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'MeritVoyage_Favorites.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting CSV:', err);
+      alert('Error generating CSV. Please try again.');
+    }
   };
+
+  // Safety check for theme
+  if (!theme) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex flex-col ${
@@ -108,8 +201,30 @@ const Favorites = () => {
             </p>
           </div>
 
-          {/* Filters and Sort */}
-          <div className="mb-6 flex flex-col gap-4 w-full">
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm animate-fadeIn">
+              {error}
+              <button
+                onClick={() => setError(null)}
+                className="ml-4 text-red-300 hover:text-red-100 underline"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <p className="text-white/80 mt-4">Loading favorites...</p>
+            </div>
+          )}
+
+          {/* Filters and Sort - Only show if not loading */}
+          {!loading && (
+            <div className="mb-6 flex flex-col gap-4 w-full">
             <div className="flex flex-col sm:flex-row gap-3 w-full">
               <select
                 value={filter}
@@ -153,8 +268,9 @@ const Favorites = () => {
               </button>
             </div>
           </div>
+          )}
 
-          {filteredAndSorted.length === 0 ? (
+          {!loading && filteredAndSorted.length === 0 ? (
             <div className={`text-center py-12 rounded-xl ${
               theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/10'
             }`}>
@@ -184,24 +300,28 @@ const Favorites = () => {
                 View Recommendations
               </button>
             </div>
-          ) : (
+          ) : !loading && filteredAndSorted.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAndSorted.map((university, index) => (
-                <div key={index} className="relative">
-                  <RecommendationCard university={university} />
-                  <button
-                    onClick={() => handleRemove(university)}
-                    className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-lg"
-                    title="Remove from favorites"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+              {filteredAndSorted.map((university, index) => {
+                if (!university || !university.name) return null;
+                return (
+                  <div key={`${university.name}-${index}`} className="relative">
+                    <RecommendationCard university={university} />
+                    <button
+                      onClick={() => handleRemove(university)}
+                      className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-lg z-10"
+                      title="Remove from favorites"
+                      aria-label="Remove from favorites"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 

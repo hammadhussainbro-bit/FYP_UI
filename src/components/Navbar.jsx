@@ -11,16 +11,85 @@ const Navbar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
   
-  // Debug: Log state changes and calculate position
+  // Calculate dropdown position - handle portrait/landscape orientation
   useEffect(() => {
-    console.log('isUserMenuOpen changed to:', isUserMenuOpen);
     if (isUserMenuOpen && userMenuRef.current) {
-      const rect = userMenuRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8,
-        right: window.innerWidth - rect.right
-      });
-      console.log('Dropdown should be visible now! Position:', { top: rect.bottom + 8, right: window.innerWidth - rect.right });
+      const updatePosition = () => {
+        if (!userMenuRef.current) return;
+        
+        const rect = userMenuRef.current.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const scrollY = window.scrollY || window.pageYOffset;
+        const dropdownWidth = 224; // minWidth from style
+        const estimatedDropdownHeight = 500; // estimated max height
+        const spacing = 8;
+        const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top') || '0', 10) || 0;
+        
+        // Calculate right position - ensure it stays within viewport
+        let right = viewportWidth - rect.right;
+        
+        // If dropdown would go off-screen on the right, adjust to left side
+        if (right < spacing) {
+          right = spacing;
+        } else if (right + dropdownWidth > viewportWidth - spacing) {
+          right = Math.max(spacing, viewportWidth - dropdownWidth - spacing);
+        }
+        
+        // Calculate top position
+        let top = rect.bottom + scrollY + spacing;
+        
+        // Check available space below and above
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top - safeAreaTop;
+        
+        // If not enough space below but enough above, show above button
+        if (spaceBelow < estimatedDropdownHeight && spaceAbove > estimatedDropdownHeight) {
+          top = rect.top + scrollY - estimatedDropdownHeight - spacing;
+        } else if (spaceBelow < estimatedDropdownHeight) {
+          // Not enough space either way, position below but limit height
+          top = rect.bottom + scrollY + spacing;
+        }
+        
+        // Ensure dropdown doesn't go off top of viewport (account for safe area)
+        const minTop = scrollY + safeAreaTop + spacing;
+        if (top < minTop) {
+          top = minTop;
+        }
+        
+        // Ensure dropdown doesn't go off bottom of viewport
+        const maxTop = scrollY + viewportHeight - spacing;
+        if (top + estimatedDropdownHeight > maxTop) {
+          top = Math.max(minTop, maxTop - estimatedDropdownHeight);
+        }
+        
+        setDropdownPosition({ top, right });
+      };
+      
+      // Initial position calculation
+      updatePosition();
+      
+      // Update on resize and orientation change
+      const handleResize = () => {
+        requestAnimationFrame(updatePosition);
+      };
+      
+      const handleOrientationChange = () => {
+        // Delay to allow browser to complete orientation change
+        setTimeout(() => {
+          requestAnimationFrame(updatePosition);
+        }, 150);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('orientationchange', handleOrientationChange);
+      window.addEventListener('scroll', updatePosition, { passive: true });
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('orientationchange', handleOrientationChange);
+        window.removeEventListener('scroll', updatePosition);
+      };
     }
   }, [isUserMenuOpen]);
   const userMenuRef = useRef(null);
@@ -271,6 +340,7 @@ const Navbar = () => {
                       position: 'fixed',
                       top: `${dropdownPosition.top}px`,
                       right: `${dropdownPosition.right}px`,
+                      left: 'auto',
                       backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
                       border: theme === 'dark' ? '2px solid #374151' : '2px solid #3b82f6',
                       boxShadow: theme === 'dark' 
@@ -278,12 +348,15 @@ const Navbar = () => {
                         : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                       minWidth: '224px',
                       width: '224px',
-                      maxHeight: isMobile ? 'calc(100vh - 80px)' : 'none',
-                      overflowY: isMobile ? 'auto' : 'visible',
+                      maxWidth: 'calc(100vw - 16px)',
+                      maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 100px)',
+                      overflowY: 'auto',
+                      overflowX: 'hidden',
                       opacity: 1,
                       visibility: 'visible',
                       display: 'block',
-                      pointerEvents: 'auto'
+                      pointerEvents: 'auto',
+                      WebkitOverflowScrolling: 'touch'
                     }}
                   >
                     <div className="py-2">
@@ -562,9 +635,13 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className={`md:hidden py-3 sm:py-4 space-y-2 sm:space-y-3 max-h-[calc(100vh-70px)] overflow-y-auto overscroll-contain w-full ${
+          <div className={`md:hidden py-3 sm:py-4 space-y-2 sm:space-y-3 max-h-[calc(100vh-80px)] overflow-y-auto overscroll-contain w-full ${
             theme === 'dark' ? 'border-t border-gray-700' : 'border-t border-white/20'
-          }`} style={{ WebkitOverflowScrolling: 'touch' }}>
+          }`} style={{ 
+            WebkitOverflowScrolling: 'touch',
+            maxHeight: 'calc(100vh - 80px)',
+            overflowY: 'auto'
+          }}>
                     {location.pathname !== '/' && (
                       <Link
                         to="/"
