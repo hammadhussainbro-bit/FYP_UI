@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 const AdminDashboard = () => {
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('stats');
   const [students, setStudents] = useState([]);
@@ -383,9 +385,17 @@ const AdminDashboard = () => {
     const total = Object.values(data).reduce((sum, val) => sum + val, 0);
     if (total === 0) {
       return (
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-          <h3 className="text-xl font-bold text-white mb-4">{title}</h3>
-          <p className="text-white/60 text-center py-8">No data available</p>
+        <div className={`backdrop-blur-md rounded-xl p-6 border ${
+          theme === 'dark' 
+            ? 'bg-gray-800/90 border-gray-700' 
+            : 'bg-white/10 border-white/20'
+        }`}>
+          <h3 className={`text-xl font-bold mb-4 ${
+            theme === 'dark' ? 'text-white' : 'text-white'
+          }`}>{title}</h3>
+          <p className={`text-center py-8 ${
+            theme === 'dark' ? 'text-gray-400' : 'text-white/60'
+          }`}>No data available</p>
         </div>
       );
     }
@@ -399,8 +409,14 @@ const AdminDashboard = () => {
     const center = size / 2;
 
     return (
-      <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all animate-fadeIn">
-        <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+      <div className={`backdrop-blur-md rounded-xl p-6 border transition-all animate-fadeIn ${
+        theme === 'dark' 
+          ? 'bg-gray-800/90 border-gray-700 hover:bg-gray-700/90' 
+          : 'bg-white/10 border-white/20 hover:bg-white/15'
+      }`}>
+        <h3 className={`text-xl font-bold mb-6 flex items-center ${
+          theme === 'dark' ? 'text-white' : 'text-white'
+        }`}>
           <span className="w-1 h-6 bg-gradient-to-b from-blue-400 to-purple-400 mr-3 rounded"></span>
           {title}
         </h3>
@@ -483,8 +499,14 @@ const AdminDashboard = () => {
     const [from, to] = colorSchemes[color] || colorSchemes.blue;
 
     return (
-      <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all animate-fadeIn">
-        <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+      <div className={`backdrop-blur-md rounded-xl p-6 border transition-all animate-fadeIn ${
+        theme === 'dark' 
+          ? 'bg-gray-800/90 border-gray-700 hover:bg-gray-700/90' 
+          : 'bg-white/10 border-white/20 hover:bg-white/15'
+      }`}>
+        <h3 className={`text-xl font-bold mb-6 flex items-center ${
+          theme === 'dark' ? 'text-white' : 'text-white'
+        }`}>
           <span className="w-1 h-6 bg-gradient-to-b from-blue-400 to-purple-400 mr-3 rounded"></span>
           {title}
         </h3>
@@ -523,7 +545,11 @@ const AdminDashboard = () => {
 
     return (
       <div
-        className={`bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all hover:scale-105 hover:shadow-xl animate-fadeIn`}
+        className={`backdrop-blur-md rounded-xl p-6 border transition-all hover:scale-105 hover:shadow-xl animate-fadeIn ${
+          theme === 'dark' 
+            ? 'bg-gray-800/90 border-gray-700 hover:bg-gray-700/90' 
+            : 'bg-white/10 border-white/20 hover:bg-white/15'
+        }`}
         style={{ animationDelay: `${delay}s` }}
       >
         <div className={`w-12 h-12 bg-gradient-to-br ${gradients[gradient]} rounded-xl flex items-center justify-center mb-4 shadow-lg`}>
@@ -745,35 +771,73 @@ const AdminDashboard = () => {
 
   
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700">
+    <div className={`min-h-screen flex flex-col ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
+    }`}>
       <Navbar />
       
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8 animate-fadeIn">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+            <h1 className={`text-4xl md:text-5xl font-bold mb-2 ${
+              theme === 'dark' ? 'text-white' : 'text-white'
+            }`}>
               Admin Dashboard
             </h1>
-            <p className="text-white/80 mb-4">Manage students, universities, and view analytics</p>
+            <p className={theme === 'dark' ? 'text-gray-300 mb-4' : 'text-white/80 mb-4'}>Manage students, universities, and view analytics</p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-              <div className="text-white/70 text-sm mb-1">Total Students</div>
-              <div className="text-3xl font-bold text-white">{students.length}</div>
+            <div className={`backdrop-blur-md rounded-xl p-6 border ${
+              theme === 'dark' 
+                ? 'bg-gray-800/90 border-gray-700' 
+                : 'bg-white/10 border-white/20'
+            }`}>
+              <div className={`text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-400' : 'text-white/70'
+              }`}>Total Students</div>
+              <div className={`text-3xl font-bold ${
+                theme === 'dark' ? 'text-white' : 'text-white'
+              }`}>{students.length}</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-              <div className="text-white/70 text-sm mb-1">Total Universities</div>
-              <div className="text-3xl font-bold text-white">{universities.length}</div>
+            <div className={`backdrop-blur-md rounded-xl p-6 border ${
+              theme === 'dark' 
+                ? 'bg-gray-800/90 border-gray-700' 
+                : 'bg-white/10 border-white/20'
+            }`}>
+              <div className={`text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-400' : 'text-white/70'
+              }`}>Total Universities</div>
+              <div className={`text-3xl font-bold ${
+                theme === 'dark' ? 'text-white' : 'text-white'
+              }`}>{universities.length}</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-              <div className="text-white/70 text-sm mb-1">Questionnaires</div>
-              <div className="text-3xl font-bold text-white">{questionnaires.length}</div>
+            <div className={`backdrop-blur-md rounded-xl p-6 border ${
+              theme === 'dark' 
+                ? 'bg-gray-800/90 border-gray-700' 
+                : 'bg-white/10 border-white/20'
+            }`}>
+              <div className={`text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-400' : 'text-white/70'
+              }`}>Questionnaires</div>
+              <div className={`text-3xl font-bold ${
+                theme === 'dark' ? 'text-white' : 'text-white'
+              }`}>{questionnaires.length}</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-              <div className="text-white/70 text-sm mb-1">Completion Rate</div>
-              <div className="text-3xl font-bold text-white">
+            <div className={`backdrop-blur-md rounded-xl p-6 border ${
+              theme === 'dark' 
+                ? 'bg-gray-800/90 border-gray-700' 
+                : 'bg-white/10 border-white/20'
+            }`}>
+              <div className={`text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-400' : 'text-white/70'
+              }`}>Completion Rate</div>
+              <div className={`text-3xl font-bold ${
+                theme === 'dark' ? 'text-white' : 'text-white'
+              }`}>
                 {students.length > 0 ? ((questionnaires.length / students.length) * 100).toFixed(0) : 0}%
               </div>
             </div>
@@ -785,8 +849,12 @@ const AdminDashboard = () => {
               onClick={() => setActiveTab('stats')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                 activeTab === 'stats'
-                  ? 'bg-white text-blue-600 shadow-lg'
-                  : 'bg-white/20 text-white hover:bg-white/30'
+                  ? theme === 'dark'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-blue-600 shadow-lg'
+                  : theme === 'dark'
+                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                    : 'bg-white/20 text-white hover:bg-white/30'
               }`}
             >
               Statistics & Charts
@@ -795,8 +863,12 @@ const AdminDashboard = () => {
               onClick={() => setActiveTab('students')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                 activeTab === 'students'
-                  ? 'bg-white text-blue-600 shadow-lg'
-                  : 'bg-white/20 text-white hover:bg-white/30'
+                  ? theme === 'dark'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-blue-600 shadow-lg'
+                  : theme === 'dark'
+                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                    : 'bg-white/20 text-white hover:bg-white/30'
               }`}
             >
               Students ({students.length})
@@ -805,8 +877,12 @@ const AdminDashboard = () => {
               onClick={() => setActiveTab('universities')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                 activeTab === 'universities'
-                  ? 'bg-white text-blue-600 shadow-lg'
-                  : 'bg-white/20 text-white hover:bg-white/30'
+                  ? theme === 'dark'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-blue-600 shadow-lg'
+                  : theme === 'dark'
+                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                    : 'bg-white/20 text-white hover:bg-white/30'
               }`}
             >
               Universities ({universities.length})
@@ -815,8 +891,12 @@ const AdminDashboard = () => {
               onClick={() => setActiveTab('questions')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                 activeTab === 'questions'
-                  ? 'bg-white text-blue-600 shadow-lg'
-                  : 'bg-white/20 text-white hover:bg-white/30'
+                  ? theme === 'dark'
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-blue-600 shadow-lg'
+                  : theme === 'dark'
+                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                    : 'bg-white/20 text-white hover:bg-white/30'
               }`}
             >
               Manage Questions ({questionnaireQuestions.length})
@@ -973,65 +1053,71 @@ const AdminDashboard = () => {
 
           {/* Students Tab */}
           {activeTab === 'students' && (
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 animate-slideIn">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">All Students</h2>
-                <div className="text-white/80">
+            <div className={`backdrop-blur-md rounded-xl p-6 border animate-slideIn ${
+              theme === 'dark' 
+                ? 'bg-gray-800/90 border-gray-700' 
+                : 'bg-white/10 border-white/20'
+            }`}>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-white">All Students</h2>
+                <div className="text-white/80 text-sm sm:text-base">
                   Total: {students.length} students
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-white/20">
-                      <th className="pb-3 text-white font-semibold">Name</th>
-                      <th className="pb-3 text-white font-semibold">Email</th>
-                      <th className="pb-3 text-white font-semibold">Phone</th>
-                      <th className="pb-3 text-white font-semibold">Gender</th>
-                      <th className="pb-3 text-white font-semibold">Age</th>
-                      <th className="pb-3 text-white font-semibold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {students.map((student, index) => {
-                      let age = 'N/A';
-                      if (student.dob) {
-                        const birthDate = new Date(student.dob);
-                        const today = new Date();
-                        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
-                        const monthDiff = today.getMonth() - birthDate.getMonth();
-                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                          calculatedAge--;
+              <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                <div className="min-w-full inline-block align-middle">
+                  <table className="w-full text-left min-w-[640px] sm:min-w-0">
+                    <thead>
+                      <tr className="border-b border-white/20">
+                        <th className="pb-3 pr-4 text-white font-semibold text-xs sm:text-sm">Name</th>
+                        <th className="pb-3 pr-4 text-white font-semibold text-xs sm:text-sm">Email</th>
+                        <th className="pb-3 pr-4 text-white font-semibold text-xs sm:text-sm hidden sm:table-cell">Phone</th>
+                        <th className="pb-3 pr-4 text-white font-semibold text-xs sm:text-sm hidden md:table-cell">Gender</th>
+                        <th className="pb-3 pr-4 text-white font-semibold text-xs sm:text-sm hidden lg:table-cell">Age</th>
+                        <th className="pb-3 text-white font-semibold text-xs sm:text-sm">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {students.map((student, index) => {
+                        let age = 'N/A';
+                        if (student.dob) {
+                          const birthDate = new Date(student.dob);
+                          const today = new Date();
+                          let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+                          const monthDiff = today.getMonth() - birthDate.getMonth();
+                          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                            calculatedAge--;
+                          }
+                          age = calculatedAge;
                         }
-                        age = calculatedAge;
-                      }
-                      return (
-                        <tr key={index} className="border-b border-white/10">
-                          <td className="py-3 text-white/90">{student.name}</td>
-                          <td className="py-3 text-white/90">{student.email}</td>
-                          <td className="py-3 text-white/90">{student.phone || 'N/A'}</td>
-                          <td className="py-3 text-white/90">{student.gender || 'N/A'}</td>
-                          <td className="py-3 text-white/90">{age}</td>
-                          <td className="py-3">
-                            <button
-                              onClick={() => handleDeleteStudent(student.email)}
-                              className="px-3 py-1 bg-red-500/80 hover:bg-red-600 text-white rounded text-sm transition-colors"
-                            >
-                              Delete
-                            </button>
+                        return (
+                          <tr key={index} className="border-b border-white/10">
+                            <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm break-words">{student.name}</td>
+                            <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm break-words">{student.email}</td>
+                            <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm hidden sm:table-cell break-words">{student.phone || 'N/A'}</td>
+                            <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm hidden md:table-cell">{student.gender || 'N/A'}</td>
+                            <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm hidden lg:table-cell">{age}</td>
+                            <td className="py-3">
+                              <button
+                                onClick={() => handleDeleteStudent(student.email)}
+                                className="px-2 sm:px-3 py-1.5 sm:py-1 bg-red-500/80 hover:bg-red-600 text-white rounded text-xs sm:text-sm transition-colors touch-manipulation min-h-[36px] sm:min-h-[32px]"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {students.length === 0 && (
+                        <tr>
+                          <td colSpan="6" className="py-8 text-center text-white/60 text-sm sm:text-base">
+                            No students registered yet
                           </td>
                         </tr>
-                      );
-                    })}
-                    {students.length === 0 && (
-                      <tr>
-                        <td colSpan="6" className="py-8 text-center text-white/60">
-                          No students registered yet
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -1040,11 +1126,11 @@ const AdminDashboard = () => {
           {activeTab === 'universities' && (
             <div className="space-y-6 animate-slideIn">
               <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">Universities & Programs</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Universities & Programs</h2>
                   <button
                     onClick={handleAddUniversity}
-                    className="px-4 py-2 bg-green-500/80 hover:bg-green-600 text-white rounded-lg transition-colors"
+                    className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-green-500/80 hover:bg-green-600 text-white rounded-lg transition-colors text-sm sm:text-base touch-manipulation min-h-[44px] sm:min-h-[36px] flex items-center justify-center"
                   >
                     + Add University
                   </button>
@@ -1111,7 +1197,11 @@ const AdminDashboard = () => {
 
           {/* Questions Management Tab */}
           {activeTab === 'questions' && (
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 animate-slideIn">
+            <div className={`backdrop-blur-md rounded-xl p-6 border animate-slideIn ${
+              theme === 'dark' 
+                ? 'bg-gray-800/90 border-gray-700' 
+                : 'bg-white/10 border-white/20'
+            }`}>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-white">Questionnaire Questions</h2>
                 <button

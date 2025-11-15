@@ -48,14 +48,14 @@ const RecommendationHistory = () => {
                       : 'bg-white/90 border-gray-200'
                   }`}
                 >
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <h3 className={`text-lg font-bold ${
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`text-base sm:text-lg font-bold break-words ${
                         theme === 'dark' ? 'text-white' : 'text-gray-800'
                       }`}>
                         Recommendations from {new Date(entry.createdAt).toLocaleDateString()}
                       </h3>
-                      <p className={`text-sm ${
+                      <p className={`text-xs sm:text-sm ${
                         theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                       }`}>
                         {new Date(entry.createdAt).toLocaleString()}
@@ -63,7 +63,7 @@ const RecommendationHistory = () => {
                     </div>
                     <button
                       onClick={() => setSelectedEntry(selectedEntry === index ? null : index)}
-                      className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                      className={`px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm touch-manipulation min-h-[44px] sm:min-h-[36px] flex items-center justify-center ${
                         theme === 'dark'
                           ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                           : 'bg-blue-500 text-white hover:bg-blue-600'

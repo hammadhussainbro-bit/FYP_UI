@@ -84,8 +84,8 @@ const UniversityComparison = ({ universities, onClose }) => {
         </div>
 
         {/* Comparison Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <table className="w-full min-w-[600px] sm:min-w-0">
             <thead>
               <tr className={`${
                 theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'

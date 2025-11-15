@@ -211,16 +211,16 @@ const DeadlineTracker = () => {
                 Never miss an important deadline
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0">
+            <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0 w-full sm:w-auto">
               <button
                 onClick={() => setShowAddUniversityModal(true)}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg"
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg touch-manipulation min-h-[44px] flex items-center justify-center text-sm sm:text-base"
               >
                 🔍 Search University Deadlines
               </button>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg"
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg touch-manipulation min-h-[44px] flex items-center justify-center text-sm sm:text-base"
               >
                 + Add Deadline Manually
               </button>
@@ -379,14 +379,14 @@ const DeadlineTracker = () => {
                 <label className={`block text-sm font-medium mb-2 ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                 }`}>University Name</label>
-                <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={universitySearch}
                     onChange={(e) => setUniversitySearch(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearchUniversity()}
                     placeholder="e.g., NUST, LUMS, FAST"
-                    className={`flex-1 px-4 py-2 rounded-lg border ${
+                    className={`flex-1 w-full px-4 py-2.5 sm:py-2 rounded-lg border text-sm sm:text-base min-h-[44px] ${
                       theme === 'dark'
                         ? 'bg-gray-700 border-gray-600 text-gray-100'
                         : 'bg-white border-gray-300 text-gray-800'
@@ -395,7 +395,7 @@ const DeadlineTracker = () => {
                   <button
                     onClick={handleSearchUniversity}
                     disabled={!universitySearch.trim() || searchingDeadlines}
-                    className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-6 py-2.5 sm:py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation min-h-[44px] flex items-center justify-center text-sm sm:text-base"
                   >
                     {searchingDeadlines ? 'Searching...' : 'Search'}
                   </button>
@@ -431,8 +431,8 @@ const DeadlineTracker = () => {
                             : 'bg-gray-50 border-gray-200'
                         }`}
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-start gap-3">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <span className={`px-2 py-1 rounded text-xs font-semibold ${
                                 deadline.type === 'entry_test'
@@ -445,17 +445,17 @@ const DeadlineTracker = () => {
                                  deadline.type === 'scholarship' ? 'Scholarship' : 'Application'}
                               </span>
                             </div>
-                            <p className={`font-medium ${
+                            <p className={`font-medium text-sm sm:text-base ${
                               theme === 'dark' ? 'text-white' : 'text-gray-800'
                             }`}>
                               {deadline.program}
                             </p>
-                            <p className={`text-sm ${
+                            <p className={`text-xs sm:text-sm ${
                               theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                             }`}>
                               {deadline.description}
                             </p>
-                            <p className={`text-sm font-semibold mt-1 ${
+                            <p className={`text-xs sm:text-sm font-semibold mt-1 ${
                               theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                             }`}>
                               Deadline: {new Date(deadline.deadline).toLocaleDateString()}
@@ -463,7 +463,7 @@ const DeadlineTracker = () => {
                           </div>
                           <button
                             onClick={() => handleAddFoundDeadline(deadline)}
-                            className="ml-4 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all"
+                            className="w-full sm:w-auto sm:ml-4 px-4 py-2.5 sm:py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all touch-manipulation min-h-[44px] flex items-center justify-center flex-shrink-0"
                           >
                             Add
                           </button>
@@ -596,7 +596,7 @@ const DeadlineTracker = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className={`flex-1 px-4 py-2 rounded-lg font-semibold ${
+                  className={`flex-1 px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center ${
                     theme === 'dark'
                       ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                       : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -606,7 +606,7 @@ const DeadlineTracker = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all"
+                  className="flex-1 px-4 py-2.5 sm:py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center"
                 >
                   Add Deadline
                 </button>

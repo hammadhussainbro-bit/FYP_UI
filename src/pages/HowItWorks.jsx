@@ -14,25 +14,25 @@ const HowItWorks = () => {
       
       <div className="flex-1 px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12 animate-fadeIn">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
+          <div className="text-center mb-8 sm:mb-12 animate-fadeIn px-2">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4">
               How It Works
             </h1>
-            <p className="text-xl text-white/80">
+            <p className="text-base sm:text-lg md:text-xl text-white/80">
               Powered by cutting-edge AI and machine learning technology
             </p>
           </div>
 
           {/* Process Steps */}
           <div className="space-y-8 mb-12">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xl">1</span>
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 sm:p-6 md:p-8 border border-white/20 animate-slideIn">
+              <div className="flex items-start space-x-3 sm:space-x-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-lg sm:text-xl">1</span>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-3">Data Collection</h2>
-                  <p className="text-white/90 text-lg leading-relaxed">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Data Collection</h2>
+                  <p className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed">
                     Students complete a comprehensive questionnaire covering academic performance
                     (SSC, HSSC percentages), preferred degree programs, university type preferences,
                     location preferences, budget constraints, scholarship needs, academic interests,

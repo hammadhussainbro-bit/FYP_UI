@@ -72,7 +72,7 @@ const Documents = () => {
             </div>
             <button
               onClick={() => setShowUpload(true)}
-              className="mt-4 sm:mt-0 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg"
+              className="w-full sm:w-auto mt-4 sm:mt-0 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg touch-manipulation min-h-[44px] flex items-center justify-center"
             >
               + Upload Document
             </button>

@@ -102,28 +102,28 @@ const Landing = () => {
             <p className="text-base sm:text-lg md:text-xl text-white/90 mt-4 px-2">
               Personalized, data-driven guidance to help you decide with confidence.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center px-2">
               {isLoggedIn ? (
                 hasCompletedQuestionnaire ? (
                   <>
-                    <Link to="/explore-universities" className="px-7 py-3 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:bg-gray-50 transform-gpu will-change-transform scale-100 hover:scale-[1.05] w-full sm:w-[220px] text-center">
+                    <Link to="/explore-universities" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:bg-gray-50 transform-gpu will-change-transform scale-100 hover:scale-[1.05] w-full sm:w-auto sm:min-w-[200px] text-center transition-all touch-manipulation min-h-[44px] flex items-center justify-center">
                       Explore Universities
                     </Link>
-                    <Link to="/questionnaire" className="px-7 py-3 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transform-gpu will-change-transform scale-100 hover:scale-[1.05] w-full sm:w-[220px] text-center">
+                    <Link to="/questionnaire" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transform-gpu will-change-transform scale-100 hover:scale-[1.05] w-full sm:w-auto sm:min-w-[200px] text-center transition-all touch-manipulation min-h-[44px] flex items-center justify-center">
                       Get Started
                     </Link>
                   </>
                 ) : (
-                  <Link to="/questionnaire" className="px-7 py-3 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition">
+                  <Link to="/questionnaire" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition w-full sm:w-auto sm:min-w-[200px] text-center touch-manipulation min-h-[44px] flex items-center justify-center">
                     Get Started
                   </Link>
                 )
               ) : (
                 <>
-                  <Link to="/signup" className="px-7 py-3 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition">
+                  <Link to="/signup" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition w-full sm:w-auto sm:min-w-[200px] text-center touch-manipulation min-h-[44px] flex items-center justify-center">
                     Get Started
                   </Link>
-                  <Link to="/login" className="px-7 py-3 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transition">
+                  <Link to="/login" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transition w-full sm:w-auto sm:min-w-[200px] text-center touch-manipulation min-h-[44px] flex items-center justify-center">
                     Sign In
                   </Link>
                 </>

@@ -81,7 +81,7 @@ const AlternativeProgramCard = ({ program }) => {
         </div>
       </div>
 
-      <button className="w-full mt-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-semibold text-sm">
+      <button className="w-full mt-4 px-4 py-2.5 sm:py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-semibold text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center">
         Explore Program
       </button>
     </div>

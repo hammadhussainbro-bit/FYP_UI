@@ -3160,7 +3160,7 @@ const ExploreUniversities = () => {
           <div className={`mb-8 p-6 rounded-xl ${
             theme === 'dark' ? 'bg-gray-800/90' : 'bg-white/90'
           }`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Search */}
               <div>
                 <label className={`block text-sm font-medium mb-2 ${
@@ -3317,7 +3317,7 @@ const ExploreUniversities = () => {
                     <span className={`text-sm font-semibold ${
                       theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                     }`}>{university.ranking}</span>
-                    <button className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                    <button className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm touch-manipulation min-h-[44px] ${
                       theme === 'dark'
                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                         : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -3370,7 +3370,7 @@ const ExploreUniversities = () => {
             {/* Content */}
             <div className="p-6 space-y-6">
               {/* Basic Info */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 <div>
                   <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                     Established
@@ -3472,18 +3472,18 @@ const ExploreUniversities = () => {
               </div>
 
               {/* Website */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <a
                   href={selectedUniversity.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all text-center"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all text-center touch-manipulation min-h-[44px] flex items-center justify-center"
                 >
                   Visit Official Website
                 </a>
                 <button
                   onClick={() => setSelectedUniversity(null)}
-                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-all"
+                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-all touch-manipulation min-h-[44px] flex items-center justify-center"
                 >
                   Close
                 </button>

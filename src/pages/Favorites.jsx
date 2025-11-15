@@ -109,12 +109,12 @@ const Favorites = () => {
           </div>
 
           {/* Filters and Sort */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-wrap gap-3">
+          <div className="mb-6 flex flex-col gap-4 w-full">
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                className={`flex-1 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
                   theme === 'dark'
                     ? 'bg-gray-800 text-gray-200 border border-gray-700'
                     : 'bg-white/90 text-gray-800 border border-white/30'
@@ -127,7 +127,7 @@ const Favorites = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                className={`flex-1 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
                   theme === 'dark'
                     ? 'bg-gray-800 text-gray-200 border border-gray-700'
                     : 'bg-white/90 text-gray-800 border border-white/30'
@@ -138,16 +138,16 @@ const Favorites = () => {
                 <option value="fee">Sort by Fee</option>
               </select>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
               <button
                 onClick={handleExportPDF}
-                className="px-4 py-2 bg-white text-blue-600 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-all"
+                className="flex-1 sm:flex-none px-4 py-2.5 sm:py-2 bg-white text-blue-600 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all touch-manipulation min-h-[44px] flex items-center justify-center"
               >
                 Export PDF
               </button>
               <button
                 onClick={handleExportCSV}
-                className="px-4 py-2 bg-white text-indigo-600 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-all"
+                className="flex-1 sm:flex-none px-4 py-2.5 sm:py-2 bg-white text-indigo-600 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all touch-manipulation min-h-[44px] flex items-center justify-center"
               >
                 Export CSV
               </button>

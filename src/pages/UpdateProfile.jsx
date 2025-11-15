@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 const UpdateProfile = () => {
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: localStorage.getItem('userName') || '',
@@ -118,20 +120,30 @@ const UpdateProfile = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700">
+    <div className={`min-h-screen flex flex-col ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
+        : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
+    }`}>
       <Navbar />
       
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-2xl w-full">
-          <div className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-8 border border-white/20 animate-fadeIn">
+          <div className={`backdrop-blur-md rounded-xl shadow-2xl p-8 animate-fadeIn ${
+            theme === 'dark' 
+              ? 'bg-gray-800/90 border border-gray-700' 
+              : 'bg-white/10 border border-white/20'
+          }`}>
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold text-white mb-2">Update Profile</h2>
-              <p className="text-white/80">Manage your account information</p>
+              <h2 className={`text-3xl font-bold mb-2 ${
+                theme === 'dark' ? 'text-white' : 'text-white'
+              }`}>Update Profile</h2>
+              <p className={theme === 'dark' ? 'text-gray-300' : 'text-white/80'}>Manage your account information</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -148,7 +160,9 @@ const UpdateProfile = () => {
               )}
 
               <div>
-                <label htmlFor="name" className="block text-white font-medium mb-2">
+                <label htmlFor="name" className={`block font-medium mb-2 ${
+                  theme === 'dark' ? 'text-gray-200' : 'text-white'
+                }`}>
                   Full Name
                 </label>
                 <input
@@ -157,13 +171,19 @@ const UpdateProfile = () => {
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                  className={`w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                    theme === 'dark' 
+                      ? 'bg-gray-700/90 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500' 
+                      : 'bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:ring-white/50'
+                  }`}
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-white font-medium mb-2">
+                <label htmlFor="email" className={`block font-medium mb-2 ${
+                  theme === 'dark' ? 'text-gray-200' : 'text-white'
+                }`}>
                   Email Address
                 </label>
                 <input
@@ -172,13 +192,19 @@ const UpdateProfile = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                  className={`w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                    theme === 'dark' 
+                      ? 'bg-gray-700/90 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500' 
+                      : 'bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:ring-white/50'
+                  }`}
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="dob" className="block text-white font-medium mb-2">
+                <label htmlFor="dob" className={`block font-medium mb-2 ${
+                  theme === 'dark' ? 'text-gray-200' : 'text-white'
+                }`}>
                   Date of Birth
                 </label>
                 <input
@@ -188,16 +214,26 @@ const UpdateProfile = () => {
                   value={formData.dob}
                   onChange={handleChange}
                   max={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all [color-scheme:dark]"
+                  className={`w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                    theme === 'dark' 
+                      ? 'bg-gray-700/90 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 [color-scheme:dark]' 
+                      : 'bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:ring-white/50 [color-scheme:dark]'
+                  }`}
                 />
               </div>
 
-              <div className="border-t border-white/20 pt-6">
-                <h3 className="text-white font-semibold mb-4">Change Password (Optional)</h3>
+              <div className={`border-t pt-6 ${
+                theme === 'dark' ? 'border-gray-700' : 'border-white/20'
+              }`}>
+                <h3 className={`font-semibold mb-4 ${
+                  theme === 'dark' ? 'text-gray-200' : 'text-white'
+                }`}>Change Password (Optional)</h3>
                 
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="currentPassword" className="block text-white font-medium mb-2">
+                    <label htmlFor="currentPassword" className={`block font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-200' : 'text-white'
+                    }`}>
                       Current Password
                     </label>
                     <input
@@ -206,13 +242,19 @@ const UpdateProfile = () => {
                       type="password"
                       value={formData.currentPassword}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                      className={`w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                        theme === 'dark' 
+                          ? 'bg-gray-700/90 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500' 
+                          : 'bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:ring-white/50'
+                      }`}
                       placeholder="Enter current password"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="newPassword" className="block text-white font-medium mb-2">
+                    <label htmlFor="newPassword" className={`block font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-200' : 'text-white'
+                    }`}>
                       New Password
                     </label>
                     <input
@@ -221,13 +263,19 @@ const UpdateProfile = () => {
                       type="password"
                       value={formData.newPassword}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                      className={`w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                        theme === 'dark' 
+                          ? 'bg-gray-700/90 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500' 
+                          : 'bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:ring-white/50'
+                      }`}
                       placeholder="Enter new password"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="confirmPassword" className="block text-white font-medium mb-2">
+                    <label htmlFor="confirmPassword" className={`block font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-200' : 'text-white'
+                    }`}>
                       Confirm New Password
                     </label>
                     <input
@@ -236,7 +284,11 @@ const UpdateProfile = () => {
                       type="password"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
+                      className={`w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                        theme === 'dark' 
+                          ? 'bg-gray-700/90 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500' 
+                          : 'bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/60 focus:ring-white/50'
+                      }`}
                       placeholder="Confirm new password"
                     />
                   </div>

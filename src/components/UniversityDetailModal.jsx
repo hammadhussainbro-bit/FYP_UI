@@ -14,10 +14,10 @@ const UniversityDetailModal = ({ university, onClose }) => {
         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
       } rounded-xl shadow-2xl max-w-4xl w-full my-8`}>
         {/* Header */}
-        <div className="flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className={`text-2xl font-bold ${
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-start gap-3 sm:gap-0 p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+              <h2 className={`text-xl sm:text-2xl font-bold break-words ${
                 theme === 'dark' ? 'text-white' : 'text-gray-800'
               }`}>{university.name}</h2>
               <FavoriteButton university={university} />
@@ -39,8 +39,8 @@ const UniversityDetailModal = ({ university, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <div>
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                 Match Score
@@ -107,14 +107,14 @@ const UniversityDetailModal = ({ university, onClose }) => {
             </div>
           )}
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all"
+              className="w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center"
             >
               Apply Now
             </button>
             <button
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all"
+              className="w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center"
             >
               Visit Website
             </button>

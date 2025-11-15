@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { createPortal } from 'react-dom';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -8,6 +9,20 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  
+  // Debug: Log state changes and calculate position
+  useEffect(() => {
+    console.log('isUserMenuOpen changed to:', isUserMenuOpen);
+    if (isUserMenuOpen && userMenuRef.current) {
+      const rect = userMenuRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        right: window.innerWidth - rect.right
+      });
+      console.log('Dropdown should be visible now! Position:', { top: rect.bottom + 8, right: window.innerWidth - rect.right });
+    }
+  }, [isUserMenuOpen]);
   const userMenuRef = useRef(null);
   const userMenuTimeoutRef = useRef(null);
   const mobileMenuRef = useRef(null);
@@ -40,12 +55,23 @@ const Navbar = () => {
           setIsMenuOpen(false);
         }
       }
-      // Check if click is outside user menu
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        const userButton = event.target.closest('button[aria-label="User menu"]');
-        if (!userButton) {
-          clearUserMenuTimeout();
-          setIsUserMenuOpen(false);
+      // Check if click is outside user menu (but allow clicks on dropdown links)
+      if (isUserMenuOpen) {
+        const clickedElement = event.target;
+        const isDropdownLink = clickedElement.closest('a[href]') || clickedElement.closest('button');
+        const isUserButton = clickedElement.closest('button[aria-label="User menu"]');
+        const isInsideDropdown = clickedElement.closest('[style*="zIndex: 99999"]') || clickedElement.closest('[style*="z-index: 99999"]');
+        
+        // Only close if click is outside dropdown and not on user button or dropdown links
+        if (!isInsideDropdown && !isUserButton) {
+          // Allow navigation for links before closing
+          if (isDropdownLink && clickedElement.tagName === 'A') {
+            // Let the link navigate, then close dropdown
+            setTimeout(() => setIsUserMenuOpen(false), 100);
+          } else if (!isDropdownLink) {
+            clearUserMenuTimeout();
+            setIsUserMenuOpen(false);
+          }
         }
       }
     };
@@ -68,29 +94,34 @@ const Navbar = () => {
     }
   };
 
-  // Handle mouse enter - open immediately and clear any pending close (desktop only)
+  // Handle mouse enter - open immediately and clear any pending close
   const handleUserMenuEnter = () => {
-    if (!isMobile) {
-      clearUserMenuTimeout();
-      setIsUserMenuOpen(true);
-    }
+    clearUserMenuTimeout();
+    // Always open on hover - works on both desktop and mobile
+    console.log('Hover detected - opening menu');
+    setIsUserMenuOpen(true);
+  };
+  
+  // Force open for testing
+  const forceOpenMenu = () => {
+    console.log('Force opening menu');
+    setIsUserMenuOpen(true);
   };
 
-  // Handle mouse leave - close after delay (desktop only)
+  // Handle mouse leave - close after delay
   const handleUserMenuLeave = () => {
-    if (!isMobile) {
-      clearUserMenuTimeout();
-      userMenuTimeoutRef.current = setTimeout(() => {
-        setIsUserMenuOpen(false);
-      }, 200);
-    }
+    clearUserMenuTimeout();
+    // Close after delay to allow moving mouse to dropdown
+    userMenuTimeoutRef.current = setTimeout(() => {
+      setIsUserMenuOpen(false);
+    }, 200);
   };
 
-  // Handle click for mobile
-  const handleUserMenuClick = () => {
-    if (isMobile) {
-      setIsUserMenuOpen(!isUserMenuOpen);
-    }
+  // Handle click - toggle menu
+  const handleUserMenuClick = (e) => {
+    e?.stopPropagation();
+    // Toggle on click for both mobile and desktop
+    setIsUserMenuOpen(prev => !prev);
   };
 
   const handleLogout = () => {
@@ -107,9 +138,9 @@ const Navbar = () => {
       theme === 'dark' 
         ? 'bg-gray-900/90 backdrop-blur-md border-b border-gray-700' 
         : 'bg-white/10 backdrop-blur-md border-b border-white/20'
-    } sticky top-0 z-50 transition-colors safe-area-top w-full overflow-x-hidden`} style={{ width: '100%', maxWidth: '100vw' }}>
+    } sticky top-0 z-50 transition-colors safe-area-top w-full`} style={{ width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 w-full" style={{ width: '100%', maxWidth: '100%' }}>
-        <div className="flex justify-between items-center min-h-[56px] sm:min-h-[60px] md:min-h-[64px] h-14 sm:h-15 md:h-16 w-full overflow-x-hidden">
+        <div className="flex justify-between items-center min-h-[56px] sm:min-h-[60px] md:min-h-[64px] h-14 sm:h-15 md:h-16 w-full" style={{ overflowX: 'hidden' }}>
           <Link to="/" className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
             <img 
               src="/logo.svg" 
@@ -122,7 +153,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4" style={{ position: 'relative', zIndex: 1 }}>
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -172,14 +203,35 @@ const Navbar = () => {
                 How It Works
               </Link>
             {isLoggedIn ? (
-              <div className="relative" ref={userMenuRef}>
+              <div 
+                className="relative" 
+                ref={userMenuRef} 
+                style={{ zIndex: 99999, position: 'relative' }}
+                onMouseEnter={() => {
+                  console.log('Parent div hover');
+                  handleUserMenuEnter();
+                }}
+                onMouseLeave={handleUserMenuLeave}
+              >
                 <button
-                  onClick={handleUserMenuClick}
-                  onMouseEnter={handleUserMenuEnter}
-                  onMouseLeave={handleUserMenuLeave}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Button clicked, current state:', isUserMenuOpen);
+                    setIsUserMenuOpen(prev => {
+                      const newState = !prev;
+                      console.log('Menu state changed to:', newState);
+                      return newState;
+                    });
+                  }}
+                  onMouseEnter={() => {
+                    console.log('Button hover');
+                    handleUserMenuEnter();
+                  }}
                   className="flex items-center space-x-1.5 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-white/10 active:bg-white/20 transition-all touch-manipulation"
                   aria-label="User menu"
                   aria-expanded={isUserMenuOpen}
+                  type="button"
                 >
                   <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-semibold text-xs sm:text-sm">
@@ -207,19 +259,45 @@ const Navbar = () => {
                 </button>
 
                 {/* User Dropdown Menu */}
-                {isUserMenuOpen && (
+                {isUserMenuOpen && typeof document !== 'undefined' && createPortal(
                   <div
                     onMouseEnter={handleUserMenuEnter}
                     onMouseLeave={handleUserMenuLeave}
-                    className={`absolute right-0 mt-2 w-56 sm:w-64 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 overflow-hidden animate-fadeIn z-50 ${
-                      isMobile ? 'max-h-[calc(100vh-80px)] overflow-y-auto' : ''
+                    className={`rounded-xl shadow-2xl overflow-hidden ${
+                      theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
                     }`}
+                    style={{ 
+                      zIndex: 99999,
+                      position: 'fixed',
+                      top: `${dropdownPosition.top}px`,
+                      right: `${dropdownPosition.right}px`,
+                      backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+                      border: theme === 'dark' ? '2px solid #374151' : '2px solid #3b82f6',
+                      boxShadow: theme === 'dark' 
+                        ? '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3)'
+                        : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                      minWidth: '224px',
+                      width: '224px',
+                      maxHeight: isMobile ? 'calc(100vh - 80px)' : 'none',
+                      overflowY: isMobile ? 'auto' : 'visible',
+                      opacity: 1,
+                      visibility: 'visible',
+                      display: 'block',
+                      pointerEvents: 'auto'
+                    }}
                   >
                     <div className="py-2">
                       <Link
                         to="/questionnaire"
-                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                          theme === 'dark' 
+                            ? 'text-gray-200 hover:bg-gray-700' 
+                            : 'text-gray-700 hover:bg-blue-50'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsUserMenuOpen(false);
+                        }}
                       >
                         <svg
                           className="w-5 h-5 mr-3 text-blue-600"
@@ -238,8 +316,15 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/documents"
-                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                          theme === 'dark' 
+                            ? 'text-gray-200 hover:bg-gray-700' 
+                            : 'text-gray-700 hover:bg-blue-50'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsUserMenuOpen(false);
+                        }}
                       >
                         <svg
                           className="w-5 h-5 mr-3 text-blue-600"
@@ -258,8 +343,15 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/recommendations"
-                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                          theme === 'dark' 
+                            ? 'text-gray-200 hover:bg-gray-700' 
+                            : 'text-gray-700 hover:bg-blue-50'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsUserMenuOpen(false);
+                        }}
                       >
                         <svg
                           className="w-5 h-5 mr-3 text-blue-600"
@@ -278,8 +370,15 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/favorites"
-                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                          theme === 'dark' 
+                            ? 'text-gray-200 hover:bg-gray-700' 
+                            : 'text-gray-700 hover:bg-blue-50'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsUserMenuOpen(false);
+                        }}
                       >
                         <svg
                           className="w-5 h-5 mr-3 text-red-500"
@@ -298,8 +397,15 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/deadlines"
-                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                          theme === 'dark' 
+                            ? 'text-gray-200 hover:bg-gray-700' 
+                            : 'text-gray-700 hover:bg-blue-50'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsUserMenuOpen(false);
+                        }}
                       >
                         <svg
                           className="w-5 h-5 mr-3 text-orange-500"
@@ -318,8 +424,15 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/update-profile"
-                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        className={`flex items-center px-4 py-3 transition-colors cursor-pointer ${
+                          theme === 'dark' 
+                            ? 'text-gray-200 hover:bg-gray-700' 
+                            : 'text-gray-700 hover:bg-blue-50'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsUserMenuOpen(false);
+                        }}
                       >
                         <svg
                           className="w-5 h-5 mr-3 text-blue-600"
@@ -336,10 +449,16 @@ const Navbar = () => {
                         </svg>
                         Update Profile
                       </Link>
-                      <div className="border-t border-gray-200 my-1"></div>
+                      <div className={`border-t my-1 ${
+                        theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+                      }`}></div>
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center px-4 py-3 text-red-600 hover:bg-red-50 transition-colors"
+                        className={`w-full flex items-center px-4 py-3 transition-colors ${
+                          theme === 'dark' 
+                            ? 'text-red-400 hover:bg-gray-700' 
+                            : 'text-red-600 hover:bg-red-50'
+                        }`}
                       >
                         <svg
                           className="w-5 h-5 mr-3"
@@ -357,7 +476,8 @@ const Navbar = () => {
                         Logout
                       </button>
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             ) : (

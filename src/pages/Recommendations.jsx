@@ -491,23 +491,23 @@ const Recommendations = () => {
           </div>
 
           {/* Search and Filter */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between w-full">
             <input
               type="text"
               placeholder="Search universities..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`flex-1 max-w-md px-4 py-2 rounded-lg ${
+              className={`flex-1 w-full sm:max-w-md px-4 py-2.5 sm:py-2 rounded-lg text-sm sm:text-base min-h-[44px] ${
                 theme === 'dark'
                   ? 'bg-gray-800 text-gray-200 border border-gray-700'
                   : 'bg-white/90 text-gray-800 border border-white/30'
               }`}
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
                   theme === 'dark'
                     ? 'bg-gray-800 text-gray-200 border border-gray-700'
                     : 'bg-white/90 text-gray-800 border border-white/30'
@@ -520,7 +520,7 @@ const Recommendations = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+                className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
                   theme === 'dark'
                     ? 'bg-gray-800 text-gray-200 border border-gray-700'
                     : 'bg-white/90 text-gray-800 border border-white/30'
@@ -585,8 +585,8 @@ const Recommendations = () => {
           </section>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-8 sm:mt-12 px-4">
-            <button onClick={handleDownload} className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-blue-600 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all shadow-lg">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mt-8 sm:mt-12 px-2 sm:px-4">
+            <button onClick={handleDownload} className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3 bg-white text-blue-600 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all shadow-lg touch-manipulation min-h-[44px] flex items-center justify-center">
               Download Report
             </button>
             <button 
@@ -596,14 +596,14 @@ const Recommendations = () => {
                 }
                 navigate('/questionnaire');
               }}
-              className="px-6 sm:px-8 py-2.5 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-white/30 transition-all border border-white/30"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-white/30 transition-all border border-white/30 touch-manipulation min-h-[44px] flex items-center justify-center"
             >
               Retake Questionnaire
             </button>
             {comparisonUnis.length > 0 && (
               <button
                 onClick={() => setShowComparison(true)}
-                className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold text-sm sm:text-base hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold text-sm sm:text-base hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg touch-manipulation min-h-[44px] flex items-center justify-center"
               >
                 Compare ({comparisonUnis.length})
               </button>

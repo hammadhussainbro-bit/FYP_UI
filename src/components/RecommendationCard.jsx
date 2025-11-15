@@ -83,18 +83,18 @@ const RecommendationCard = ({ university, onCompare }) => {
         </ul>
       </div>
 
-      <div className="flex gap-2 mt-3 sm:mt-4">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 mt-3 sm:mt-4">
         {onCompare && (
           <button
             onClick={() => onCompare(university)}
-            className="flex-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all font-semibold text-sm sm:text-base"
+            className="w-full sm:flex-1 px-3 sm:px-4 py-2.5 sm:py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all font-semibold text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center"
           >
             Compare
           </button>
         )}
         <button
           onClick={() => setShowDetail(true)}
-          className={`${onCompare ? 'flex-1' : 'w-full'} px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-semibold text-sm sm:text-base`}
+          className={`${onCompare ? 'w-full sm:flex-1' : 'w-full'} px-3 sm:px-4 py-2.5 sm:py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-semibold text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center`}
         >
           View Details
         </button>
