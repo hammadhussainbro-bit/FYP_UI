@@ -25,18 +25,20 @@ const RecommendationCard = ({ university, onCompare }) => {
           </div>
           <p className={`text-xs sm:text-sm mb-2 ${
             theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-          }`}>{university.location}</p>
+          }`}>{university.location || 'Location not specified'}</p>
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold whitespace-nowrap">
-              Match: {university.matchScore}%
+              Match: {university.matchScore || 'N/A'}%
             </span>
-            <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold whitespace-nowrap">
-              {university.rank}
-            </span>
+            {university.rank && (
+              <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold whitespace-nowrap">
+                {university.rank}
+              </span>
+            )}
           </div>
         </div>
         <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-base sm:text-lg md:text-xl flex-shrink-0">
-          {university.name.charAt(0)}
+          {university.name ? university.name.charAt(0).toUpperCase() : '?'}
         </div>
       </div>
 
@@ -46,7 +48,7 @@ const RecommendationCard = ({ university, onCompare }) => {
         }`}>Program Offered:</h4>
         <p className={`text-sm sm:text-base break-words ${
           theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-        }`}>{university.program}</p>
+        }`}>{university.program || 'Program not specified'}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
@@ -56,7 +58,7 @@ const RecommendationCard = ({ university, onCompare }) => {
           }`}>Tuition Fee</p>
           <p className={`font-semibold text-sm sm:text-base break-words ${
             theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
-          }`}>{university.tuitionFee}</p>
+          }`}>{university.tuitionFee || 'Not specified'}</p>
         </div>
         <div>
           <p className={`text-xs mb-1 ${
@@ -65,7 +67,7 @@ const RecommendationCard = ({ university, onCompare }) => {
           <p className={`font-semibold text-sm sm:text-base break-words ${
             theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
           }`}>
-            {university.entryTestRequired}
+            {university.entryTestRequired || 'Not specified'}
           </p>
         </div>
       </div>
@@ -77,9 +79,13 @@ const RecommendationCard = ({ university, onCompare }) => {
         <ul className={`list-disc list-inside text-xs sm:text-sm space-y-1 ${
           theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
         }`}>
-          {university.highlights.map((highlight, index) => (
-            <li key={index} className="break-words">{highlight}</li>
-          ))}
+          {university.highlights && Array.isArray(university.highlights) && university.highlights.length > 0 ? (
+            university.highlights.map((highlight, index) => (
+              <li key={index} className="break-words">{highlight}</li>
+            ))
+          ) : (
+            <li className="break-words">No highlights available</li>
+          )}
         </ul>
       </div>
 
