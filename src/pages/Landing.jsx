@@ -6,24 +6,28 @@ import { useTheme } from '../context/ThemeContext';
 import useRevealOnScroll from '../utils/useRevealOnScroll';
 
 const Stat = ({ label, value }) => (
-  <div className="glass rounded-xl p-5 text-center reveal-init" >
-    <div className="text-3xl md:text-4xl font-extrabold text-white">{value}</div>
-    <div className="text-white/70 text-sm mt-1">{label}</div>
+  <div className="glass rounded-xl p-4 sm:p-5 md:p-6 text-center reveal-init w-full flex flex-col items-center justify-center hover:scale-105 transition-all duration-300 hover:shadow-xl" style={{ 
+    backdropFilter: 'blur(16px)', 
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+    background: 'rgba(255, 255, 255, 0.08)'
+  }}>
+    <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-lg" style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)' }}>{value}</div>
+    <div className="text-white/70 text-xs sm:text-sm whitespace-nowrap font-medium">{label}</div>
   </div>
 );
 
 const TestimonialCard = ({ quote, name, title }) => {
   const ref = useRevealOnScroll();
   return (
-    <div ref={ref} className="glass rounded-2xl p-6 md:p-8 h-full">
+    <div ref={ref} className="glass rounded-2xl p-5 sm:p-6 md:p-8 h-full w-full hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" style={{ backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.05)' }}>
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-pink-500" />
-        <div>
-          <div className="text-white font-semibold">{name}</div>
-          <div className="text-white/70 text-sm">{title}</div>
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-pink-500 flex-shrink-0 shadow-lg ring-2 ring-white/20" />
+        <div className="min-w-0 flex-1">
+          <div className="text-white font-semibold text-sm sm:text-base drop-shadow-sm">{name}</div>
+          <div className="text-white/70 text-xs sm:text-sm truncate">{title}</div>
         </div>
       </div>
-      <p className="text-white/90 text-lg leading-relaxed">“{quote}”</p>
+      <p className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed break-words drop-shadow-sm">"{quote}"</p>
     </div>
   );
 };
@@ -31,12 +35,12 @@ const TestimonialCard = ({ quote, name, title }) => {
 const FeatureCard = ({ title, desc, icon, gradient }) => {
   const ref = useRevealOnScroll();
   return (
-    <div ref={ref} className="glass rounded-2xl p-4 sm:p-5 md:p-6 active:bg-white/20 transition-colors">
-      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-3 sm:mb-4 ${gradient}`}>
+    <div ref={ref} className="glass rounded-2xl p-4 sm:p-5 md:p-6 active:bg-white/20 transition-all duration-300 w-full h-auto hover:scale-[1.02] hover:shadow-2xl hover:-translate-y-1" style={{ backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.05)' }}>
+      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-3 sm:mb-4 flex-shrink-0 ${gradient} shadow-lg hover:scale-110 transition-transform duration-300`}>
         {icon}
       </div>
-      <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{title}</h3>
-      <p className="text-white/80 text-sm sm:text-base">{desc}</p>
+      <h3 className="text-lg sm:text-xl font-bold text-white mb-2 break-words drop-shadow-md">{title}</h3>
+      <p className="text-white/80 text-sm sm:text-base break-words leading-relaxed">{desc}</p>
     </div>
   );
 };
@@ -114,57 +118,90 @@ const Landing = () => {
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30 pointer-events-none">
-          <div className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] lg:w-[600px] lg:h-[600px] bg-fuchsia-500 rounded-full blur-3xl absolute -top-20 -left-20 floaty" />
-          <div className="w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] md:w-[450px] md:h-[450px] lg:w-[500px] lg:h-[500px] bg-indigo-500 rounded-full blur-3xl absolute top-40 right-0 floaty" style={{ animationDelay: '1.2s' }} />
+        <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden" style={{ mixBlendMode: 'screen' }}>
+          <div 
+            id="blob-purple"
+            className="w-[600px] h-[600px] sm:w-[700px] sm:h-[700px] md:w-[800px] md:h-[800px] lg:w-[900px] lg:h-[900px] bg-fuchsia-500 rounded-full blur-3xl absolute -top-20 -left-20" 
+            style={{
+              animation: 'blobMove1 15s ease-in-out infinite',
+              willChange: 'transform',
+              transformOrigin: 'center center'
+            }}
+          />
+          <div 
+            id="blob-blue"
+            className="w-[550px] h-[550px] sm:w-[650px] sm:h-[650px] md:w-[750px] md:h-[750px] lg:w-[850px] lg:h-[850px] bg-indigo-500 rounded-full blur-3xl absolute top-40 right-0" 
+            style={{
+              animation: 'blobMove2 15s ease-in-out infinite',
+              animationDelay: '2s',
+              willChange: 'transform',
+              transformOrigin: 'center center'
+            }}
+          />
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 flex flex-col items-center">
-          <div ref={heroRef} className="reveal-init text-center max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm mb-5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Smart University Recommendations
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-20 sm:py-24 md:py-32 lg:py-36 flex flex-col items-center justify-center min-h-[70vh]">
+          <div ref={heroRef} className="reveal-init text-center w-full max-w-3xl mx-auto">
             {userName && (
-              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black bg-gradient-to-r from-orange-400 via-amber-300 to-white bg-clip-text text-transparent leading-[1.1] tracking-tight mb-2 px-2">
+              <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-orange-400 via-amber-300 to-white bg-clip-text text-transparent leading-[1.1] tracking-tight mb-4 sm:mb-5 px-2 drop-shadow-lg" style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)' }}>
                 Hello {userName}
               </div>
             )}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight px-2">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight px-2 drop-shadow-lg" style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)' }}>
               Find your perfect <span className="gradient-text">University Match</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-white/90 mt-4 px-2">
+            <p className="text-base sm:text-lg md:text-xl text-white mt-6 sm:mt-8 md:mt-10 px-2 drop-shadow-md" style={{ textShadow: '0 1px 5px rgba(0, 0, 0, 0.3)' }}>
               Personalized, data-driven guidance to help you decide with confidence.
             </p>
-            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center px-2">
+            <div className="mt-10 sm:mt-12 md:mt-14 lg:mt-16 flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center px-2 w-full sm:w-auto">
               {isLoggedIn ? (
                 hasCompletedQuestionnaire ? (
                   <>
-                    <Link to="/explore-universities" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:bg-gray-50 transform-gpu will-change-transform scale-100 hover:scale-[1.05] w-full sm:w-auto sm:min-w-[200px] text-center transition-all touch-manipulation min-h-[44px] flex items-center justify-center">
-                      Explore Universities
+                    <Link to="/questionnaire" className="group relative px-8 sm:px-10 py-4 sm:py-4.5 bg-gradient-to-r from-white via-gray-50 to-white text-indigo-700 font-semibold rounded-2xl shadow-xl hover:shadow-2xl transform-gpu will-change-transform transition-all duration-300 touch-manipulation min-h-[52px] w-full sm:w-auto sm:min-w-[220px] text-center flex items-center justify-center overflow-hidden button-glow-primary">
+                      <span className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></span>
+                      <span className="relative z-10 flex items-center gap-2">
+                        Get Started
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
                     </Link>
-                    <Link to="/questionnaire" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transform-gpu will-change-transform scale-100 hover:scale-[1.05] w-full sm:w-auto sm:min-w-[200px] text-center transition-all touch-manipulation min-h-[44px] flex items-center justify-center">
-                      Get Started
+                    <Link to="/explore-universities" className="group relative px-8 sm:px-10 py-4 sm:py-4.5 bg-white/5 backdrop-blur-md text-white border-2 border-white/30 font-semibold rounded-2xl hover:bg-white/10 hover:border-white/50 transform-gpu will-change-transform transition-all duration-300 touch-manipulation min-h-[52px] w-full sm:w-auto sm:min-w-[220px] text-center flex items-center justify-center overflow-hidden button-glow-secondary">
+                      <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                      <span className="relative z-10">Explore Universities</span>
                     </Link>
                   </>
                 ) : (
-                  <Link to="/questionnaire" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition w-full sm:w-auto sm:min-w-[200px] text-center touch-manipulation min-h-[44px] flex items-center justify-center">
-                    Get Started
+                  <Link to="/questionnaire" className="group relative px-8 sm:px-10 py-4 sm:py-4.5 bg-gradient-to-r from-white via-gray-50 to-white text-indigo-700 font-semibold rounded-2xl shadow-xl hover:shadow-2xl transform-gpu will-change-transform transition-all duration-300 touch-manipulation min-h-[52px] w-full sm:w-auto sm:min-w-[220px] text-center flex items-center justify-center overflow-hidden button-glow-primary">
+                    <span className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></span>
+                    <span className="relative z-10 flex items-center gap-2">
+                      Get Started
+                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
                   </Link>
                 )
               ) : (
                 <>
-                  <Link to="/signup" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white text-indigo-700 font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition w-full sm:w-auto sm:min-w-[200px] text-center touch-manipulation min-h-[44px] flex items-center justify-center">
-                    Get Started
+                  <Link to="/signup" className="group relative px-8 sm:px-10 py-4 sm:py-4.5 bg-gradient-to-r from-white via-gray-50 to-white text-indigo-700 font-semibold rounded-2xl shadow-xl hover:shadow-2xl transform-gpu will-change-transform transition-all duration-300 touch-manipulation min-h-[52px] w-full sm:w-auto sm:min-w-[220px] text-center flex items-center justify-center overflow-hidden button-glow-primary">
+                    <span className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></span>
+                    <span className="relative z-10 flex items-center gap-2">
+                      Get Started
+                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
                   </Link>
-                  <Link to="/login" className="px-6 sm:px-7 py-3 sm:py-3.5 bg-white/10 text-white border border-white/20 font-semibold rounded-xl hover:bg-white/20 transition w-full sm:w-auto sm:min-w-[200px] text-center touch-manipulation min-h-[44px] flex items-center justify-center">
-                    Sign In
+                  <Link to="/login" className="group relative px-8 sm:px-10 py-4 sm:py-4.5 bg-white/5 backdrop-blur-md text-white border-2 border-white/30 font-semibold rounded-2xl hover:bg-white/10 hover:border-white/50 transform-gpu will-change-transform transition-all duration-300 touch-manipulation min-h-[52px] w-full sm:w-auto sm:min-w-[220px] text-center flex items-center justify-center overflow-hidden button-glow-secondary">
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                    <span className="relative z-10">Sign In</span>
                   </Link>
                 </>
               )}
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-12 sm:mt-16 md:mt-20 lg:mt-24 w-full max-w-2xl mx-auto">
               <Stat label="Programs" value="2,500+" />
               <Stat label="Universities" value="350+" />
               <Stat label="Countries" value="25" />
@@ -175,10 +212,10 @@ const Landing = () => {
       </section>
 
               {/* Features */}
-              <section className="py-8 sm:py-12 md:py-16 px-3 sm:px-4 md:px-6 lg:px-8 w-full overflow-x-hidden">
+              <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-12 lg:px-20 w-full overflow-x-hidden">
                 <div className="max-w-7xl mx-auto w-full">
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white text-center mb-6 sm:mb-8 md:mb-10 px-2">Why Choose MeritVoyage?</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full">
             <FeatureCard
               title="Smart Matching"
               desc="AI-driven matching aligns your academic profile, preferences, and goals with the right programs."
@@ -214,10 +251,10 @@ const Landing = () => {
       </section>
 
               {/* Testimonials */}
-              <section className="py-8 sm:py-12 md:py-16 px-3 sm:px-4 md:px-6 lg:px-8 w-full overflow-x-hidden">
+              <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 md:px-12 lg:px-20 w-full overflow-x-hidden">
                 <div className="max-w-7xl mx-auto w-full">
                   <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white text-center mb-6 sm:mb-8 md:mb-10 px-2">What students say</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
             <TestimonialCard
               name="Ayesha Khan"
               title="BSc Computer Science, Class of 2027"
@@ -239,6 +276,101 @@ const Landing = () => {
 
 
       <Footer />
+      
+      <style>{`
+        @keyframes blobMove1 {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          25% {
+            transform: translate(300px, -200px) scale(1.2);
+          }
+          50% {
+            transform: translate(-250px, 250px) scale(0.8);
+          }
+          75% {
+            transform: translate(200px, -150px) scale(1.1);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+        
+        @keyframes blobMove2 {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          25% {
+            transform: translate(-250px, 200px) scale(0.8);
+          }
+          50% {
+            transform: translate(300px, -250px) scale(1.2);
+          }
+          75% {
+            transform: translate(-200px, -150px) scale(1.1);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+        
+        @keyframes buttonPulse {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(0, 0, 0, 0.1);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4), 0 6px 30px rgba(0, 0, 0, 0.15);
+          }
+        }
+        
+        @keyframes shimmer {
+          0% {
+            background-position: -1000px 0;
+          }
+          100% {
+            background-position: 1000px 0;
+          }
+        }
+        
+        #blob-purple {
+          animation: blobMove1 15s ease-in-out infinite;
+          will-change: transform;
+        }
+        
+        #blob-blue {
+          animation: blobMove2 15s ease-in-out infinite;
+          animation-delay: 2s;
+          will-change: transform;
+        }
+        
+        .button-glow-primary {
+          position: relative;
+          box-shadow: 0 10px 40px rgba(255, 255, 255, 0.2), 0 0 20px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        
+        .button-glow-primary:hover {
+          box-shadow: 0 15px 50px rgba(255, 255, 255, 0.3), 0 0 30px rgba(139, 92, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+          transform: translateY(-2px);
+        }
+        
+        .button-glow-primary:active {
+          transform: translateY(0px) scale(0.98);
+        }
+        
+        .button-glow-secondary {
+          position: relative;
+          box-shadow: 0 8px 30px rgba(255, 255, 255, 0.1), 0 0 15px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .button-glow-secondary:hover {
+          box-shadow: 0 12px 40px rgba(255, 255, 255, 0.15), 0 0 25px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          transform: translateY(-2px);
+        }
+        
+        .button-glow-secondary:active {
+          transform: translateY(0px) scale(0.98);
+        }
+      `}</style>
     </div>
   );
 };

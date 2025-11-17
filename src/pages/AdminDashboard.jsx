@@ -8,6 +8,7 @@ const AdminDashboard = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('stats');
+  const [isMobile, setIsMobile] = useState(false);
   const [students, setStudents] = useState([]);
   const [universities, setUniversities] = useState([]);
   const [questionnaires, setQuestionnaires] = useState([]);
@@ -22,6 +23,10 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     loadData();
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const loadData = () => {
@@ -381,19 +386,19 @@ const AdminDashboard = () => {
   const stats = getStats();
 
   // Enhanced Pie Chart with animations
-  const AnimatedPieChart = ({ data, title, size = 200 }) => {
+  const AnimatedPieChart = ({ data, title, size = 200, isMobile = false }) => {
     const total = Object.values(data).reduce((sum, val) => sum + val, 0);
     if (total === 0) {
       return (
-        <div className={`backdrop-blur-md rounded-xl p-6 border ${
+        <div className={`backdrop-blur-md rounded-xl p-4 sm:p-6 border ${
           theme === 'dark' 
             ? 'bg-gray-800/90 border-gray-700' 
             : 'bg-white/10 border-white/20'
         }`}>
-          <h3 className={`text-xl font-bold mb-4 ${
+          <h3 className={`text-sm sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 ${
             theme === 'dark' ? 'text-white' : 'text-white'
           }`}>{title}</h3>
-          <p className={`text-center py-8 ${
+          <p className={`text-center py-4 sm:py-8 text-xs sm:text-sm ${
             theme === 'dark' ? 'text-gray-400' : 'text-white/60'
           }`}>No data available</p>
         </div>
@@ -405,23 +410,31 @@ const AdminDashboard = () => {
       '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899',
       '#06B6D4', '#F97316', '#84CC16', '#A855F7', '#14B8A6', '#F43F5E'
     ];
-    const radius = size / 2 - 20;
-    const center = size / 2;
+    // Responsive size: smaller on mobile
+    const responsiveSize = isMobile ? 140 : size;
+    const radius = responsiveSize / 2 - 15;
+    const center = responsiveSize / 2;
 
     return (
-      <div className={`backdrop-blur-md rounded-xl p-6 border transition-all animate-fadeIn ${
+      <div className={`group relative backdrop-blur-xl rounded-2xl p-4 sm:p-5 md:p-6 border transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 animate-fadeIn ${
         theme === 'dark' 
-          ? 'bg-gray-800/90 border-gray-700 hover:bg-gray-700/90' 
-          : 'bg-white/10 border-white/20 hover:bg-white/15'
-      }`}>
-        <h3 className={`text-xl font-bold mb-6 flex items-center ${
+          ? 'bg-gray-800/80 border-gray-700/50 hover:border-gray-600/50' 
+          : 'bg-white/10 border-white/20 hover:border-white/30'
+      }`} style={{ 
+        boxShadow: theme === 'dark' 
+          ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05)'
+          : '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)'
+      }}>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="relative z-10">
+        <h3 className={`text-xs sm:text-base md:text-lg lg:text-xl font-bold mb-2 sm:mb-4 md:mb-6 flex items-center ${
           theme === 'dark' ? 'text-white' : 'text-white'
         }`}>
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-400 to-purple-400 mr-3 rounded"></span>
-          {title}
+          <span className="w-0.5 sm:w-1 h-3 sm:h-5 md:h-6 bg-gradient-to-b from-blue-400 to-purple-400 mr-1.5 sm:mr-2 md:mr-3 rounded"></span>
+          <span className="truncate">{title}</span>
         </h3>
         <div className="flex flex-col items-center">
-          <svg width={size} height={size} className="transform -rotate-90">
+          <svg width={responsiveSize} height={responsiveSize} className="transform -rotate-90" viewBox={`0 0 ${responsiveSize} ${responsiveSize}`}>
             {Object.entries(data).map(([key, value], index) => {
               const percentage = (value / total) * 100;
               const angle = (value / total) * 360;
@@ -458,29 +471,30 @@ const AdminDashboard = () => {
               {total}
             </text>
           </svg>
-          <div className="mt-6 w-full space-y-2 max-h-48 overflow-y-auto">
+          <div className="mt-4 sm:mt-6 w-full space-y-2 max-h-48 overflow-y-auto">
             {Object.entries(data)
               .sort(([, a], [, b]) => b - a)
               .map(([key, value], index) => (
                 <div
                   key={key}
-                  className="flex items-center justify-between p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all animate-slideIn"
+                  className="group/item flex items-center justify-between p-2.5 sm:p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all duration-300 animate-slideIn border border-transparent hover:border-white/10"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <div className="flex items-center flex-1">
+                  <div className="flex items-center flex-1 min-w-0">
                     <div
-                      className="w-4 h-4 rounded-full mr-3 shadow-lg"
+                      className="w-3 h-3 sm:w-4 sm:h-4 rounded-full mr-2 sm:mr-3 shadow-lg flex-shrink-0"
                       style={{ backgroundColor: colors[index % colors.length] }}
                     />
-                    <span className="text-white/90 text-sm flex-1">{key}</span>
+                    <span className="text-white/90 text-[10px] sm:text-xs md:text-sm flex-1 truncate">{key}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-white font-semibold">{value}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <span className="text-white font-semibold text-xs sm:text-sm">{value}</span>
                     <span className="text-white/60 text-xs">({((value / total) * 100).toFixed(1)}%)</span>
                   </div>
                 </div>
               ))}
           </div>
+        </div>
         </div>
       </div>
     );
@@ -499,29 +513,35 @@ const AdminDashboard = () => {
     const [from, to] = colorSchemes[color] || colorSchemes.blue;
 
     return (
-      <div className={`backdrop-blur-md rounded-xl p-6 border transition-all animate-fadeIn ${
+      <div className={`group relative backdrop-blur-xl rounded-2xl p-4 sm:p-5 md:p-6 border transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 animate-fadeIn ${
         theme === 'dark' 
-          ? 'bg-gray-800/90 border-gray-700 hover:bg-gray-700/90' 
-          : 'bg-white/10 border-white/20 hover:bg-white/15'
-      }`}>
-        <h3 className={`text-xl font-bold mb-6 flex items-center ${
+          ? 'bg-gray-800/80 border-gray-700/50 hover:border-gray-600/50' 
+          : 'bg-white/10 border-white/20 hover:border-white/30'
+      }`} style={{ 
+        boxShadow: theme === 'dark' 
+          ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05)'
+          : '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)'
+      }}>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="relative z-10">
+        <h3 className={`text-xs sm:text-base md:text-lg lg:text-xl font-bold mb-2 sm:mb-4 md:mb-6 flex items-center ${
           theme === 'dark' ? 'text-white' : 'text-white'
         }`}>
-          <span className="w-1 h-6 bg-gradient-to-b from-blue-400 to-purple-400 mr-3 rounded"></span>
-          {title}
+          <span className="w-0.5 sm:w-1 h-3 sm:h-5 md:h-6 bg-gradient-to-b from-blue-400 to-purple-400 mr-1.5 sm:mr-2 md:mr-3 rounded"></span>
+          <span className="truncate">{title}</span>
         </h3>
-        <div className="space-y-4">
+        <div className="space-y-2 sm:space-y-3 md:space-y-4">
           {Object.entries(data)
             .sort(([, a], [, b]) => b - a)
             .map(([key, value], index) => (
               <div key={key} className="animate-slideIn" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="flex justify-between text-white/90 mb-2">
-                  <span className="text-sm font-medium">{key}</span>
-                  <span className="text-sm font-bold">{value}</span>
+                <div className="flex justify-between text-white/90 mb-1 sm:mb-2">
+                  <span className="text-[10px] sm:text-xs md:text-sm font-medium truncate pr-1 sm:pr-2">{key}</span>
+                  <span className="text-[10px] sm:text-xs md:text-sm font-bold flex-shrink-0">{value}</span>
                 </div>
-                <div className="w-full bg-white/10 rounded-full h-8 overflow-hidden shadow-inner">
+                <div className="w-full bg-white/10 rounded-full h-5 sm:h-6 md:h-8 overflow-hidden shadow-inner">
                   <div
-                    className={`h-full bg-gradient-to-r ${from} ${to} transition-all duration-1000 ease-out flex items-center justify-end pr-3 shadow-lg`}
+                    className={`h-full bg-gradient-to-r ${from} ${to} transition-all duration-1000 ease-out flex items-center justify-end pr-2 sm:pr-3 shadow-lg`}
                     style={{ width: `${(value / maxValue) * 100}%` }}
                   >
                     <span className="text-white text-xs font-bold">{value}</span>
@@ -530,34 +550,45 @@ const AdminDashboard = () => {
               </div>
             ))}
         </div>
+        </div>
       </div>
     );
   };
 
-  // Info Card Component
+  // Info Card Component - Premium Design
   const InfoCard = ({ icon, title, value, subtitle, gradient, delay = 0 }) => {
     const gradients = {
-      blue: 'from-blue-500 to-cyan-500',
-      purple: 'from-purple-500 to-pink-500',
-      green: 'from-green-500 to-emerald-500',
-      yellow: 'from-yellow-500 to-orange-500',
+      blue: 'from-blue-500 via-cyan-500 to-blue-600',
+      purple: 'from-purple-500 via-pink-500 to-purple-600',
+      green: 'from-green-500 via-emerald-500 to-green-600',
+      yellow: 'from-yellow-500 via-orange-500 to-yellow-600',
     };
 
     return (
       <div
-        className={`backdrop-blur-md rounded-xl p-6 border transition-all hover:scale-105 hover:shadow-xl animate-fadeIn ${
+        className={`group relative backdrop-blur-xl rounded-2xl p-5 sm:p-6 border transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 animate-fadeIn ${
           theme === 'dark' 
-            ? 'bg-gray-800/90 border-gray-700 hover:bg-gray-700/90' 
-            : 'bg-white/10 border-white/20 hover:bg-white/15'
+            ? 'bg-gray-800/80 border-gray-700/50 hover:border-gray-600/50' 
+            : 'bg-white/10 border-white/20 hover:border-white/30'
         }`}
-        style={{ animationDelay: `${delay}s` }}
+        style={{ 
+          animationDelay: `${delay}s`,
+          boxShadow: theme === 'dark' 
+            ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05)'
+            : '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)'
+        }}
       >
-        <div className={`w-12 h-12 bg-gradient-to-br ${gradients[gradient]} rounded-xl flex items-center justify-center mb-4 shadow-lg`}>
-          {icon}
+        <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" style={{
+          background: `linear-gradient(135deg, ${gradient === 'blue' ? 'rgba(59, 130, 246, 0.1)' : gradient === 'green' ? 'rgba(16, 185, 129, 0.1)' : gradient === 'purple' ? 'rgba(168, 85, 247, 0.1)' : 'rgba(234, 179, 8, 0.1)'}, transparent)`
+        }}></div>
+        <div className="relative z-10">
+          <div className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${gradients[gradient]} rounded-xl flex items-center justify-center mb-4 shadow-xl group-hover:scale-110 transition-transform duration-300`}>
+            {icon}
+          </div>
+          <h4 className="text-white/70 text-xs sm:text-sm mb-1.5 sm:mb-2 font-medium">{title}</h4>
+          <p className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-sm">{value}</p>
+          {subtitle && <p className="text-white/60 text-xs sm:text-sm">{subtitle}</p>}
         </div>
-        <h4 className="text-white/70 text-sm mb-1">{title}</h4>
-        <p className="text-3xl font-bold text-white mb-1">{value}</p>
-        {subtitle && <p className="text-white/60 text-xs">{subtitle}</p>}
       </div>
     );
   };
@@ -778,136 +809,136 @@ const AdminDashboard = () => {
     }`}>
       <Navbar />
       
-      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+      <div className="flex-1 px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 animate-fadeIn">
-            <h1 className={`text-4xl md:text-5xl font-bold mb-2 ${
-              theme === 'dark' ? 'text-white' : 'text-white'
-            }`}>
-              Admin Dashboard
-            </h1>
-            <p className={theme === 'dark' ? 'text-gray-300 mb-4' : 'text-white/80 mb-4'}>Manage students, universities, and view analytics</p>
+          <div className="text-center mb-6 sm:mb-8 md:mb-10 animate-fadeIn">
+            <div className="inline-block mb-3 sm:mb-4">
+              <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-2 sm:mb-3 bg-gradient-to-r ${
+                theme === 'dark' 
+                  ? 'from-white via-gray-100 to-white' 
+                  : 'from-white via-blue-50 to-white'
+              } bg-clip-text text-transparent drop-shadow-lg`} style={{ 
+                textShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+                letterSpacing: '-0.02em'
+              }}>
+                Admin Dashboard
+              </h1>
+            </div>
+            <p className={`text-sm sm:text-base md:text-lg ${
+              theme === 'dark' ? 'text-gray-300' : 'text-white/80'
+            } font-medium`}>Manage students, universities, and view analytics</p>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className={`backdrop-blur-md rounded-xl p-6 border ${
-              theme === 'dark' 
-                ? 'bg-gray-800/90 border-gray-700' 
-                : 'bg-white/10 border-white/20'
-            }`}>
-              <div className={`text-sm mb-1 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-white/70'
-              }`}>Total Students</div>
-              <div className={`text-3xl font-bold ${
-                theme === 'dark' ? 'text-white' : 'text-white'
-              }`}>{students.length}</div>
-            </div>
-            <div className={`backdrop-blur-md rounded-xl p-6 border ${
-              theme === 'dark' 
-                ? 'bg-gray-800/90 border-gray-700' 
-                : 'bg-white/10 border-white/20'
-            }`}>
-              <div className={`text-sm mb-1 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-white/70'
-              }`}>Total Universities</div>
-              <div className={`text-3xl font-bold ${
-                theme === 'dark' ? 'text-white' : 'text-white'
-              }`}>{universities.length}</div>
-            </div>
-            <div className={`backdrop-blur-md rounded-xl p-6 border ${
-              theme === 'dark' 
-                ? 'bg-gray-800/90 border-gray-700' 
-                : 'bg-white/10 border-white/20'
-            }`}>
-              <div className={`text-sm mb-1 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-white/70'
-              }`}>Questionnaires</div>
-              <div className={`text-3xl font-bold ${
-                theme === 'dark' ? 'text-white' : 'text-white'
-              }`}>{questionnaires.length}</div>
-            </div>
-            <div className={`backdrop-blur-md rounded-xl p-6 border ${
-              theme === 'dark' 
-                ? 'bg-gray-800/90 border-gray-700' 
-                : 'bg-white/10 border-white/20'
-            }`}>
-              <div className={`text-sm mb-1 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-white/70'
-              }`}>Completion Rate</div>
-              <div className={`text-3xl font-bold ${
-                theme === 'dark' ? 'text-white' : 'text-white'
-              }`}>
-                {students.length > 0 ? ((questionnaires.length / students.length) * 100).toFixed(0) : 0}%
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-4 mb-8 justify-center">
+          {/* Tabs - Premium Design */}
+          <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8 justify-center">
             <button
               onClick={() => setActiveTab('stats')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              className={`group relative px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 overflow-hidden ${
                 activeTab === 'stats'
                   ? theme === 'dark'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-blue-600 shadow-lg'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl'
+                    : 'bg-white text-blue-600 shadow-xl'
                   : theme === 'dark'
-                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    ? 'bg-gray-700/80 backdrop-blur-sm text-gray-200 hover:bg-gray-600/80 border border-gray-600/50'
+                    : 'bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/20'
               }`}
+              style={activeTab === 'stats' ? {
+                boxShadow: theme === 'dark' 
+                  ? '0 8px 24px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                  : '0 8px 24px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2)'
+              } : {}}
             >
-              Statistics & Charts
+              {activeTab === 'stats' && (
+                <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              )}
+              <span className="relative z-10 flex items-center gap-2">
+                Statistics & Charts
+                {activeTab === 'stats' && (
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                )}
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('students')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              className={`group relative px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 overflow-hidden ${
                 activeTab === 'students'
                   ? theme === 'dark'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-blue-600 shadow-lg'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl'
+                    : 'bg-white text-blue-600 shadow-xl'
                   : theme === 'dark'
-                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    ? 'bg-gray-700/80 backdrop-blur-sm text-gray-200 hover:bg-gray-600/80 border border-gray-600/50'
+                    : 'bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/20'
               }`}
+              style={activeTab === 'students' ? {
+                boxShadow: theme === 'dark' 
+                  ? '0 8px 24px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                  : '0 8px 24px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2)'
+              } : {}}
             >
-              Students ({students.length})
+              {activeTab === 'students' && (
+                <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              )}
+              <span className="relative z-10 flex items-center gap-2">
+                Students ({students.length})
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('universities')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              className={`group relative px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 overflow-hidden ${
                 activeTab === 'universities'
                   ? theme === 'dark'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-blue-600 shadow-lg'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl'
+                    : 'bg-white text-blue-600 shadow-xl'
                   : theme === 'dark'
-                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    ? 'bg-gray-700/80 backdrop-blur-sm text-gray-200 hover:bg-gray-600/80 border border-gray-600/50'
+                    : 'bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/20'
               }`}
+              style={activeTab === 'universities' ? {
+                boxShadow: theme === 'dark' 
+                  ? '0 8px 24px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                  : '0 8px 24px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2)'
+              } : {}}
             >
-              Universities ({universities.length})
+              {activeTab === 'universities' && (
+                <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              )}
+              <span className="relative z-10 flex items-center gap-2">
+                Universities ({universities.length})
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('questions')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              className={`group relative px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 overflow-hidden ${
                 activeTab === 'questions'
                   ? theme === 'dark'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-blue-600 shadow-lg'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl'
+                    : 'bg-white text-blue-600 shadow-xl'
                   : theme === 'dark'
-                    ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    ? 'bg-gray-700/80 backdrop-blur-sm text-gray-200 hover:bg-gray-600/80 border border-gray-600/50'
+                    : 'bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 border border-white/20'
               }`}
+              style={activeTab === 'questions' ? {
+                boxShadow: theme === 'dark' 
+                  ? '0 8px 24px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                  : '0 8px 24px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2)'
+              } : {}}
             >
-              Manage Questions ({questionnaireQuestions.length})
+              {activeTab === 'questions' && (
+                <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              )}
+              <span className="relative z-10 flex items-center gap-2">
+                Manage Questions ({questionnaireQuestions.length})
+              </span>
             </button>
           </div>
 
           {/* Statistics Tab */}
           {activeTab === 'stats' && (
-            <div className="space-y-6 animate-slideIn">
+            <div className="space-y-3 sm:space-y-4 md:space-y-6 animate-slideIn">
               {/* Key Metrics Cards - Single Row of 4 */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 <InfoCard
                   icon={<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
                   title="Total Students"
@@ -942,22 +973,22 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Pie Charts Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <AnimatedPieChart data={stats.genderStats} title="Gender Distribution" size={220} />
-                <AnimatedPieChart data={stats.ageStats} title="Age Distribution" size={220} />
-                <AnimatedPieChart data={stats.universityTypeStats} title="Preferred University Type" size={220} />
+              {/* Pie Charts - 2x2 Grid Layout */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                <AnimatedPieChart data={stats.genderStats} title="Gender Distribution" size={180} isMobile={isMobile} />
+                <AnimatedPieChart data={stats.ageStats} title="Age Distribution" size={180} isMobile={isMobile} />
+                <AnimatedPieChart data={stats.relocateStats} title="Willingness to Relocate" size={180} isMobile={isMobile} />
+                <AnimatedPieChart data={stats.scholarshipStats} title="Scholarship Preferences" size={180} isMobile={isMobile} />
               </div>
 
-              {/* Additional Pie Charts Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <AnimatedPieChart data={stats.relocateStats} title="Willingness to Relocate" size={220} />
-                <AnimatedPieChart data={stats.scholarshipStats} title="Scholarship Preferences" size={220} />
-                <AnimatedPieChart data={stats.universityTypeDistribution} title="University Type Distribution" size={220} />
+              {/* Additional Pie Charts */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+                <AnimatedPieChart data={stats.universityTypeStats} title="Preferred University Type" size={180} isMobile={isMobile} />
+                <AnimatedPieChart data={stats.universityTypeDistribution} title="University Type Distribution" size={180} isMobile={isMobile} />
               </div>
 
               {/* Top Preferences */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 <AnimatedBarChart
                   data={Object.fromEntries(
                     Object.entries(stats.degreeStats)
@@ -979,7 +1010,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* City and Scholarship Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 <AnimatedBarChart
                   data={Object.fromEntries(
                     Object.entries(stats.cityStats)
@@ -996,22 +1027,22 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Academic Interests */}
-              <AnimatedBarChart
-                data={Object.fromEntries(
-                  Object.entries(stats.academicInterestsStats)
-                    .sort(([, a], [, b]) => b - a)
-                )}
-                title="Academic Interests"
-                color="red"
-              />
-
-              {/* Fee Distribution */}
-              <AnimatedBarChart
-                data={stats.feeRanges}
-                title="University Fee Range Distribution"
-                color="green"
-              />
+              {/* Academic Interests and Fee Distribution */}
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                <AnimatedBarChart
+                  data={Object.fromEntries(
+                    Object.entries(stats.academicInterestsStats)
+                      .sort(([, a], [, b]) => b - a)
+                  )}
+                  title="Academic Interests"
+                  color="red"
+                />
+                <AnimatedBarChart
+                  data={stats.feeRanges}
+                  title="University Fee Range Distribution"
+                  color="green"
+                />
+              </div>
 
               {/* Additional Insights */}
               <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-md rounded-xl p-6 border border-white/20">
@@ -1051,20 +1082,78 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Students Tab */}
+          {/* Students Tab - Premium Mobile Design */}
           {activeTab === 'students' && (
-            <div className={`backdrop-blur-md rounded-xl p-6 border animate-slideIn ${
+            <div className={`backdrop-blur-xl rounded-2xl p-4 sm:p-5 md:p-6 border animate-slideIn ${
               theme === 'dark' 
-                ? 'bg-gray-800/90 border-gray-700' 
+                ? 'bg-gray-800/80 border-gray-700/50' 
                 : 'bg-white/10 border-white/20'
-            }`}>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-white">All Students</h2>
-                <div className="text-white/80 text-sm sm:text-base">
-                  Total: {students.length} students
+            }`} style={{ 
+              boxShadow: theme === 'dark' 
+                ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05)'
+                : '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)'
+            }}>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white drop-shadow-sm">All Students</h2>
+                <div className="px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                  <span className="text-white/90 text-sm sm:text-base font-semibold">
+                    Total: <span className="text-white font-black">{students.length}</span> students
+                  </span>
                 </div>
               </div>
-              <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+              
+              {/* Mobile Card View */}
+              <div className="block sm:hidden space-y-3">
+                {students.map((student, index) => {
+                  let age = 'N/A';
+                  if (student.dob) {
+                    const birthDate = new Date(student.dob);
+                    const today = new Date();
+                    let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                      calculatedAge--;
+                    }
+                    age = calculatedAge;
+                  }
+                  return (
+                    <div key={index} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-white font-bold text-base mb-1 truncate">{student.name}</h3>
+                          <p className="text-white/70 text-xs mb-1 truncate">{student.email}</p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {student.phone && (
+                              <span className="text-white/60 text-xs">📞 {student.phone}</span>
+                            )}
+                            {student.gender && (
+                              <span className="text-white/60 text-xs">👤 {student.gender}</span>
+                            )}
+                            <span className="text-white/60 text-xs">🎂 {age} years</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteStudent(student.email)}
+                        className="w-full px-4 py-2.5 bg-red-500/80 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all duration-300 touch-manipulation min-h-[44px] flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
+                  );
+                })}
+                {students.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-white/60 text-sm sm:text-base">No students registered yet</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden sm:block overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                 <div className="min-w-full inline-block align-middle">
                   <table className="w-full text-left min-w-[640px] sm:min-w-0">
                     <thead>
@@ -1091,8 +1180,8 @@ const AdminDashboard = () => {
                           age = calculatedAge;
                         }
                         return (
-                          <tr key={index} className="border-b border-white/10">
-                            <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm break-words">{student.name}</td>
+                          <tr key={index} className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200">
+                            <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm break-words font-medium">{student.name}</td>
                             <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm break-words">{student.email}</td>
                             <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm hidden sm:table-cell break-words">{student.phone || 'N/A'}</td>
                             <td className="py-3 pr-4 text-white/90 text-xs sm:text-sm hidden md:table-cell">{student.gender || 'N/A'}</td>
@@ -1100,8 +1189,11 @@ const AdminDashboard = () => {
                             <td className="py-3">
                               <button
                                 onClick={() => handleDeleteStudent(student.email)}
-                                className="px-2 sm:px-3 py-1.5 sm:py-1 bg-red-500/80 hover:bg-red-600 text-white rounded text-xs sm:text-sm transition-colors touch-manipulation min-h-[36px] sm:min-h-[32px]"
+                                className="group relative px-3 sm:px-4 py-1.5 sm:py-2 bg-red-500/80 hover:bg-red-600 text-white rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 touch-manipulation min-h-[36px] sm:min-h-[40px] flex items-center justify-center gap-1.5 shadow-lg hover:shadow-xl hover:scale-105"
                               >
+                                <svg className="w-3.5 h-3.5 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
                                 Delete
                               </button>
                             </td>
@@ -1110,7 +1202,7 @@ const AdminDashboard = () => {
                       })}
                       {students.length === 0 && (
                         <tr>
-                          <td colSpan="6" className="py-8 text-center text-white/60 text-sm sm:text-base">
+                          <td colSpan="6" className="py-12 text-center text-white/60 text-sm sm:text-base">
                             No students registered yet
                           </td>
                         </tr>
@@ -1122,70 +1214,93 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Universities Tab */}
+          {/* Universities Tab - Premium Mobile Design */}
           {activeTab === 'universities' && (
-            <div className="space-y-6 animate-slideIn">
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">Universities & Programs</h2>
+            <div className="space-y-4 sm:space-y-6 animate-slideIn">
+              <div className="backdrop-blur-xl rounded-2xl p-4 sm:p-5 md:p-6 border border-white/20" style={{ 
+                boxShadow: theme === 'dark' 
+                  ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05)'
+                  : '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)'
+              }}>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white drop-shadow-sm">Universities & Programs</h2>
                   <button
                     onClick={handleAddUniversity}
-                    className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-green-500/80 hover:bg-green-600 text-white rounded-lg transition-colors text-sm sm:text-base touch-manipulation min-h-[44px] sm:min-h-[36px] flex items-center justify-center"
+                    className="group relative w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105"
+                    style={{ boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)' }}
                   >
-                    + Add University
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                    <span className="relative z-10 flex items-center gap-2">
+                      <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add University
+                    </span>
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
                   {universities.map((uni) => (
                     <div
                       key={uni.id}
-                      className="bg-white/5 rounded-lg p-6 border border-white/10"
+                      className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-4 sm:p-5 md:p-6 border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
+                      style={{ 
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+                      }}
                     >
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-1">{uni.name}</h3>
-                          <p className="text-white/70 text-sm mb-2">{uni.location}</p>
-                          <div className="flex gap-2 mb-2">
-                            <span className="inline-block px-2 py-1 bg-blue-500/30 text-blue-200 rounded text-xs">
-                              {uni.type}
-                            </span>
-                            <span className="inline-block px-2 py-1 bg-purple-500/30 text-purple-200 rounded text-xs">
-                              Rank #{uni.ranking}
-                            </span>
-                            <span className="inline-block px-2 py-1 bg-green-500/30 text-green-200 rounded text-xs">
-                              PKR {uni.tuitionFee?.toLocaleString()}/year
-                            </span>
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative z-10">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-start gap-3 sm:gap-0 mb-4">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1.5 sm:mb-2 drop-shadow-sm">{uni.name}</h3>
+                            <p className="text-white/70 text-sm sm:text-base mb-3">{uni.location}</p>
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              <span className="inline-block px-2.5 sm:px-3 py-1.5 bg-blue-500/30 backdrop-blur-sm text-blue-200 rounded-lg text-xs sm:text-sm font-semibold border border-blue-400/20">
+                                {uni.type}
+                              </span>
+                              <span className="inline-block px-2.5 sm:px-3 py-1.5 bg-purple-500/30 backdrop-blur-sm text-purple-200 rounded-lg text-xs sm:text-sm font-semibold border border-purple-400/20">
+                                Rank #{uni.ranking}
+                              </span>
+                              <span className="inline-block px-2.5 sm:px-3 py-1.5 bg-green-500/30 backdrop-blur-sm text-green-200 rounded-lg text-xs sm:text-sm font-semibold border border-green-400/20">
+                                PKR {uni.tuitionFee?.toLocaleString()}/year
+                              </span>
+                            </div>
+                            {uni.entryTest && (
+                              <p className="text-white/60 text-xs sm:text-sm mb-2">Entry Test: <span className="text-white/80 font-medium">{uni.entryTest}</span></p>
+                            )}
+                            {uni.website && (
+                              <a href={uni.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-blue-300 text-xs sm:text-sm hover:text-blue-200 hover:underline transition-colors">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                                Visit Website
+                              </a>
+                            )}
                           </div>
-                          {uni.entryTest && (
-                            <p className="text-white/60 text-xs mb-2">Entry Test: {uni.entryTest}</p>
-                          )}
-                          {uni.website && (
-                            <a href={uni.website} target="_blank" rel="noopener noreferrer" className="text-blue-300 text-xs hover:underline">
-                              Visit Website
-                            </a>
-                          )}
+                          <button
+                            onClick={() => handleAddProgram(uni.id)}
+                            className="group/btn relative px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500/80 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ml-2 flex items-center gap-1.5 shadow-lg hover:shadow-xl hover:scale-105"
+                          >
+                            <svg className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Program
+                          </button>
                         </div>
-                        <button
-                          onClick={() => handleAddProgram(uni.id)}
-                          className="px-3 py-1 bg-blue-500/80 hover:bg-blue-600 text-white rounded text-sm transition-colors ml-2"
-                        >
-                          + Program
-                        </button>
-                      </div>
-                      <div>
-                        <h4 className="text-white font-semibold mb-2">Programs ({uni.programs.length}):</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {uni.programs.map((program, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-1 bg-white/10 text-white/90 rounded text-sm"
-                            >
-                              {program}
-                            </span>
-                          ))}
-                          {uni.programs.length === 0 && (
-                            <span className="text-white/50 text-sm">No programs added</span>
-                          )}
+                        <div>
+                          <h4 className="text-white font-bold mb-2 sm:mb-3 text-sm sm:text-base">Programs ({uni.programs.length}):</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {uni.programs.map((program, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2.5 sm:px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white/90 rounded-lg text-xs sm:text-sm border border-white/10"
+                              >
+                                {program}
+                              </span>
+                            ))}
+                            {uni.programs.length === 0 && (
+                              <span className="text-white/50 text-xs sm:text-sm">No programs added</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1195,89 +1310,112 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Questions Management Tab */}
+          {/* Questions Management Tab - Premium Mobile Design */}
           {activeTab === 'questions' && (
-            <div className={`backdrop-blur-md rounded-xl p-6 border animate-slideIn ${
+            <div className={`backdrop-blur-xl rounded-2xl p-4 sm:p-5 md:p-6 border animate-slideIn ${
               theme === 'dark' 
-                ? 'bg-gray-800/90 border-gray-700' 
+                ? 'bg-gray-800/80 border-gray-700/50' 
                 : 'bg-white/10 border-white/20'
-            }`}>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Questionnaire Questions</h2>
+            }`} style={{ 
+              boxShadow: theme === 'dark' 
+                ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05)'
+                : '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)'
+            }}>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white drop-shadow-sm">Questionnaire Questions</h2>
                 <button
                   onClick={handleAddQuestion}
-                  className="px-4 py-2 bg-green-500/80 hover:bg-green-600 text-white rounded-lg transition-colors"
+                  className="group relative w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105"
+                  style={{ boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)' }}
                 >
-                  + Add Question
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="relative z-10 flex items-center gap-2">
+                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Question
+                  </span>
                 </button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {questionnaireQuestions.length > 0 ? (
                   questionnaireQuestions.map((q, index) => (
                     <div
                       key={q.id}
-                      className="bg-white/5 rounded-lg p-6 border border-white/10"
+                      className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-4 sm:p-5 md:p-6 border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.01]"
+                      style={{ 
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+                      }}
                     >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="px-3 py-1 bg-blue-500/30 text-blue-200 rounded text-sm font-semibold">
-                              Step {q.step}
-                            </span>
-                            <span className="px-3 py-1 bg-purple-500/30 text-purple-200 rounded text-sm">
-                              {q.type}
-                            </span>
-                            {q.required && (
-                              <span className="px-3 py-1 bg-red-500/30 text-red-200 rounded text-sm">
-                                Required
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative z-10">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-start gap-3 sm:gap-0">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-3">
+                              <span className="px-2.5 sm:px-3 py-1.5 bg-blue-500/30 backdrop-blur-sm text-blue-200 rounded-lg text-xs sm:text-sm font-semibold border border-blue-400/20">
+                                Step {q.step}
                               </span>
+                              <span className="px-2.5 sm:px-3 py-1.5 bg-purple-500/30 backdrop-blur-sm text-purple-200 rounded-lg text-xs sm:text-sm font-semibold border border-purple-400/20">
+                                {q.type}
+                              </span>
+                              {q.required && (
+                                <span className="px-2.5 sm:px-3 py-1.5 bg-red-500/30 backdrop-blur-sm text-red-200 rounded-lg text-xs sm:text-sm font-semibold border border-red-400/20">
+                                  Required
+                                </span>
+                              )}
+                            </div>
+                            <h3 className="text-white font-bold text-base sm:text-lg md:text-xl mb-2 sm:mb-3 drop-shadow-sm">{q.question}</h3>
+                            <p className="text-white/70 text-xs sm:text-sm mb-2 sm:mb-3">
+                              <strong className="text-white/90">Field:</strong> <span className="text-white/80 font-medium">{q.field}</span>
+                            </p>
+                            {q.options && q.options.length > 0 && (
+                              <div className="mt-3 sm:mt-4">
+                                <p className="text-white/70 text-xs sm:text-sm mb-2 font-medium"><strong>Options:</strong></p>
+                                <div className="flex flex-wrap gap-2">
+                                  {q.options.map((opt, optIdx) => (
+                                    <span
+                                      key={optIdx}
+                                      className="px-2.5 sm:px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white/90 rounded-lg text-xs sm:text-sm border border-white/10"
+                                    >
+                                      {opt}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {q.placeholder && (
+                              <p className="text-white/60 text-xs sm:text-sm mt-2 sm:mt-3">
+                                <strong className="text-white/70">Placeholder:</strong> <span className="text-white/80">{q.placeholder}</span>
+                              </p>
                             )}
                           </div>
-                          <h3 className="text-white font-semibold text-lg mb-2">{q.question}</h3>
-                          <p className="text-white/70 text-sm mb-2">
-                            <strong>Field:</strong> {q.field}
-                          </p>
-                          {q.options && q.options.length > 0 && (
-                            <div className="mt-2">
-                              <p className="text-white/70 text-sm mb-1"><strong>Options:</strong></p>
-                              <div className="flex flex-wrap gap-2">
-                                {q.options.map((opt, optIdx) => (
-                                  <span
-                                    key={optIdx}
-                                    className="px-2 py-1 bg-white/10 text-white/90 rounded text-xs"
-                                  >
-                                    {opt}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {q.placeholder && (
-                            <p className="text-white/60 text-xs mt-2">
-                              Placeholder: {q.placeholder}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => handleEditQuestion(q, index)}
-                            className="px-3 py-1 bg-blue-500/80 hover:bg-blue-600 text-white rounded text-sm transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteQuestion(index)}
-                            className="px-3 py-1 bg-red-500/80 hover:bg-red-600 text-white rounded text-sm transition-colors"
-                          >
-                            Delete
-                          </button>
+                          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 w-full sm:w-auto sm:ml-4">
+                            <button
+                              onClick={() => handleEditQuestion(q, index)}
+                              className="group/btn relative px-4 sm:px-5 py-2.5 bg-blue-500/80 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 touch-manipulation min-h-[44px] sm:min-h-[40px] flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                            >
+                              <svg className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteQuestion(index)}
+                              className="group/btn relative px-4 sm:px-5 py-2.5 bg-red-500/80 hover:bg-red-600 text-white rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 touch-manipulation min-h-[44px] sm:min-h-[40px] flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                            >
+                              <svg className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-white/60">
-                    No questions added yet. Click "Add Question" to get started.
+                  <div className="text-center py-12">
+                    <p className="text-white/60 text-sm sm:text-base">No questions added yet. Click "Add Question" to get started.</p>
                   </div>
                 )}
               </div>

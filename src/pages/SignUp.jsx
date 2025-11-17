@@ -221,9 +221,16 @@ const SignUp = () => {
 
                       <button
                         type="submit"
-                        className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold active:from-blue-600 active:to-indigo-700 transition-all shadow-lg active:shadow-xl active:scale-[0.98] touch-manipulation min-h-[44px]"
+                        className="group relative w-full py-3.5 bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 text-white rounded-2xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl active:scale-[0.98] touch-manipulation min-h-[52px] overflow-hidden"
+                        style={{ boxShadow: '0 10px 40px rgba(59, 130, 246, 0.4), 0 0 20px rgba(139, 92, 246, 0.3)' }}
                       >
-                        Sign Up
+                        <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                          Sign Up
+                          <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </span>
                       </button>
             </form>
 

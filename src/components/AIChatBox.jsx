@@ -162,11 +162,12 @@ You can also use MeritVoyage's recommendation system to find universities that m
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 ${
+          className={`group fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-y-1 ${
             theme === 'dark'
-              ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
-              : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
+              ? 'bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 text-white'
+              : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white'
           }`}
+          style={{ boxShadow: '0 10px 40px rgba(59, 130, 246, 0.4), 0 0 20px rgba(139, 92, 246, 0.3)' }}
           aria-label="Open AI Chat"
         >
           <svg
@@ -316,27 +317,33 @@ You can also use MeritVoyage's recommendation system to find universities that m
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                className={`group relative px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 overflow-hidden ${
                   isLoading || !input.trim()
                     ? 'bg-gray-400 cursor-not-allowed'
                     : theme === 'dark'
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-indigo-600 hover:bg-indigo-700'
-                } text-white`}
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+                } text-white shadow-lg hover:shadow-xl hover:scale-105`}
+                style={!isLoading && input.trim() ? { boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' } : {}}
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
+                {!isLoading && input.trim() && (
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                )}
+                <span className="relative z-10">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                </span>
               </button>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">

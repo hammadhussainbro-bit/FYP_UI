@@ -12,7 +12,7 @@ const RecommendationCard = ({ university, onCompare }) => {
       theme === 'dark'
         ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700'
         : 'bg-gradient-to-br from-gray-50 to-blue-50/50 border-blue-200/50'
-    } rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-5 md:p-6 border`}>
+    } rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-4 sm:p-5 md:p-6 border hover:scale-[1.02] hover:-translate-y-1`} style={{ boxShadow: theme === 'dark' ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.05)' : '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 20px rgba(59, 130, 246, 0.1)' }}>
       <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">

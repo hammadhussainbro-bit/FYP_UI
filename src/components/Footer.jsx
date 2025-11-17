@@ -25,9 +25,9 @@ const Footer = () => {
         : 'bg-gray-800/90 backdrop-blur-md border-t border-gray-600'
     } mt-auto transition-colors`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-8 lg:gap-10">
           {/* Company Info */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2 lg:col-span-2 order-1">
             <div className="flex items-center space-x-2 mb-4">
               <img 
                 src="/logo.svg" 
@@ -110,7 +110,7 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="order-2">
             <h3 className={`font-semibold mb-4 text-base ${
               theme === 'dark' ? 'text-white' : 'text-white'
             }`}>Quick Links</h3>
@@ -195,7 +195,7 @@ const Footer = () => {
           </div>
 
           {/* Student Resources */}
-          <div>
+          <div className="order-3">
             <h3 className={`font-semibold mb-4 text-base ${
               theme === 'dark' ? 'text-white' : 'text-white'
             }`}>Student Resources</h3>
@@ -312,7 +312,7 @@ const Footer = () => {
           </div>
 
           {/* Contact & Support */}
-          <div>
+          <div className="col-span-2 lg:col-span-1 order-4">
             <h3 className={`font-semibold mb-4 text-base ${
               theme === 'dark' ? 'text-white' : 'text-white'
             }`}>Contact & Support</h3>

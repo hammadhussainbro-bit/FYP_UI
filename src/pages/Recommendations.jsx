@@ -585,9 +585,15 @@ const Recommendations = () => {
           </section>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mt-8 sm:mt-12 px-2 sm:px-4">
-            <button onClick={handleDownload} className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3 bg-white text-blue-600 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all shadow-lg touch-manipulation min-h-[44px] flex items-center justify-center">
-              Download Report
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-stretch sm:items-center mt-8 sm:mt-12 px-2 sm:px-4">
+            <button onClick={handleDownload} className="group relative w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-4.5 bg-gradient-to-r from-white via-gray-50 to-white text-blue-600 rounded-2xl font-semibold text-sm sm:text-base transition-all duration-300 shadow-xl hover:shadow-2xl touch-manipulation min-h-[52px] flex items-center justify-center overflow-hidden hover:scale-[1.02] hover:-translate-y-0.5" style={{ boxShadow: '0 10px 40px rgba(255, 255, 255, 0.2), 0 0 20px rgba(59, 130, 246, 0.3)' }}>
+              <span className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-indigo-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></span>
+              <span className="relative z-10 flex items-center gap-2">
+                Download Report
+                <svg className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </span>
             </button>
             <button 
               onClick={() => {
@@ -596,16 +602,23 @@ const Recommendations = () => {
                 }
                 navigate('/questionnaire');
               }}
-              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3 bg-white/20 backdrop-blur-sm text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-white/30 transition-all border border-white/30 touch-manipulation min-h-[44px] flex items-center justify-center"
+              className="group relative w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-4.5 bg-white/5 backdrop-blur-md text-white border-2 border-white/30 rounded-2xl font-semibold text-sm sm:text-base hover:bg-white/10 hover:border-white/50 transition-all duration-300 touch-manipulation min-h-[52px] flex items-center justify-center overflow-hidden hover:scale-[1.02] hover:-translate-y-0.5" style={{ boxShadow: '0 8px 30px rgba(255, 255, 255, 0.1), 0 0 15px rgba(255, 255, 255, 0.1)' }}
             >
-              Retake Questionnaire
+              <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="relative z-10">Retake Questionnaire</span>
             </button>
             {comparisonUnis.length > 0 && (
               <button
                 onClick={() => setShowComparison(true)}
-                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold text-sm sm:text-base hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg touch-manipulation min-h-[44px] flex items-center justify-center"
+                className="group relative w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-4.5 bg-gradient-to-r from-purple-500 via-pink-500 to-pink-600 text-white rounded-2xl font-semibold text-sm sm:text-base hover:from-purple-600 hover:via-pink-600 hover:to-pink-700 transition-all duration-300 shadow-xl hover:shadow-2xl touch-manipulation min-h-[52px] flex items-center justify-center overflow-hidden hover:scale-[1.02] hover:-translate-y-0.5" style={{ boxShadow: '0 10px 40px rgba(168, 85, 247, 0.4), 0 0 20px rgba(236, 72, 153, 0.3)' }}
               >
-                Compare ({comparisonUnis.length})
+                <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                <span className="relative z-10 flex items-center gap-2">
+                  Compare ({comparisonUnis.length})
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </span>
               </button>
             )}
           </div>
