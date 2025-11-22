@@ -5,6 +5,9 @@ import Footer from '../components/Footer';
 import RecommendationCard from '../components/RecommendationCard';
 import { useTheme } from '../context/ThemeContext';
 import { getFavorites, removeFromFavorites } from '../utils/storage';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { SkeletonList } from '../components/SkeletonLoader';
+import { useScrollAnimation } from '../utils/useScrollAnimation';
 
 const Favorites = () => {
   const navigate = useNavigate();
@@ -14,23 +17,28 @@ const Favorites = () => {
   const [sortBy, setSortBy] = useState('matchScore');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const heroRef = useScrollAnimation();
+  const cardsRef = useScrollAnimation();
 
   useEffect(() => {
-    try {
-      const favs = getFavorites();
-      // Ensure favorites is an array and filter out any invalid entries
-      const validFavorites = Array.isArray(favs) 
-        ? favs.filter(fav => fav && fav.name && fav.program)
-        : [];
-      setFavorites(validFavorites);
-      setError(null);
-    } catch (err) {
-      console.error('Error loading favorites:', err);
-      setError('Failed to load favorites. Please try refreshing the page.');
-      setFavorites([]);
-    } finally {
-      setLoading(false);
-    }
+    const loadFavorites = async () => {
+      try {
+        const favs = getFavorites();
+        // Ensure favorites is an array and filter out any invalid entries
+        const validFavorites = Array.isArray(favs) 
+          ? favs.filter(fav => fav && fav.name && fav.program)
+          : [];
+        setFavorites(validFavorites);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading favorites:', err);
+        setError('Failed to load favorites. Please try refreshing the page.');
+        setFavorites([]);
+      } finally {
+        setTimeout(() => setLoading(false), 300);
+      }
+    };
+    loadFavorites();
   }, []);
 
   const handleRemove = (university) => {
@@ -97,20 +105,59 @@ const Favorites = () => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${
+    <div className={`min-h-screen flex flex-col relative overflow-hidden ${
       theme === 'dark' 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
     }`}>
+      {loading && <LoadingSpinner fullScreen size="xl" />}
+      
+      {/* Animated Background Blobs - More blobs */}
+      <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden" style={{ mixBlendMode: 'screen' }}>
+        <div 
+          className="w-[400px] h-[400px] sm:w-[500px] sm:h-[500px] md:w-[600px] md:h-[600px] bg-fuchsia-500 rounded-full blur-3xl absolute -top-20 -left-20" 
+          style={{
+            animation: 'blobMove1 18s ease-in-out infinite',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] md:w-[550px] md:h-[550px] bg-indigo-500 rounded-full blur-3xl absolute bottom-20 right-20" 
+          style={{
+            animation: 'blobMove2 18s ease-in-out infinite',
+            animationDelay: '3s',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] bg-purple-500 rounded-full blur-3xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" 
+          style={{
+            animation: 'blobMove1 20s ease-in-out infinite',
+            animationDelay: '6s',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] bg-pink-500 rounded-full blur-3xl absolute top-1/4 right-1/4" 
+          style={{
+            animation: 'blobMove2 22s ease-in-out infinite',
+            animationDelay: '9s',
+            willChange: 'transform',
+          }}
+        />
+      </div>
+
       <Navbar />
       
-      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-12">
+      <div className={`flex-1 px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-12 relative z-10 transition-opacity duration-300 ${loading ? 'opacity-0' : 'opacity-100'}`}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12 px-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+          <div ref={heroRef.ref} className={`text-center mb-6 sm:mb-8 md:mb-12 px-2 transition-all duration-700 ease-out ${
+            heroRef.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-white via-pink-200 to-purple-200 bg-clip-text text-transparent mb-2 sm:mb-3 md:mb-4 drop-shadow-2xl leading-tight">
               My Favorites
             </h1>
-            <p className="text-white/80 text-sm sm:text-base md:text-lg">
+            <p className="text-white/90 text-xs sm:text-sm md:text-base lg:text-lg font-light px-2">
               Your saved universities and programs
             </p>
           </div>
@@ -128,25 +175,18 @@ const Favorites = () => {
             </div>
           )}
 
-          {/* Loading State */}
-          {loading && (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-              <p className="text-white/80 mt-4">Loading favorites...</p>
-            </div>
-          )}
 
-          {/* Filters and Sort - Only show if not loading */}
+          {/* Filters and Sort */}
           {!loading && (
-            <div className="mb-6 flex flex-col gap-4 w-full">
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
+            <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4 w-full">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className={`flex-1 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
+                  className={`flex-1 w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm md:text-base min-h-[44px] glass-premium border border-white/20 text-white backdrop-blur-xl transition-all hover:scale-105 ${
                     theme === 'dark'
-                      ? 'bg-gray-800 text-gray-200 border border-gray-700'
-                      : 'bg-white/90 text-gray-800 border border-white/30'
+                      ? 'bg-gray-800/50'
+                      : 'bg-white/10'
                   }`}
                 >
                   <option value="all">All Favorites</option>
@@ -156,10 +196,10 @@ const Favorites = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className={`flex-1 w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
+                  className={`flex-1 w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm md:text-base min-h-[44px] glass-premium border border-white/20 text-white backdrop-blur-xl transition-all hover:scale-105 ${
                     theme === 'dark'
-                      ? 'bg-gray-800 text-gray-200 border border-gray-700'
-                      : 'bg-white/90 text-gray-800 border border-white/30'
+                      ? 'bg-gray-800/50'
+                      : 'bg-white/10'
                   }`}
                 >
                   <option value="matchScore">Sort by Match Score</option>
@@ -171,11 +211,11 @@ const Favorites = () => {
           )}
 
           {!loading && filteredAndSorted.length === 0 ? (
-            <div className={`text-center py-12 rounded-xl ${
-              theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/10'
+            <div ref={heroRef.ref} className={`text-center py-8 sm:py-12 rounded-xl sm:rounded-2xl glass-premium scroll-reveal transition-all duration-700 ease-out ${
+              heroRef.isVisible ? 'revealed' : ''
             }`}>
               <svg
-                className="w-16 h-16 mx-auto mb-4 text-gray-400"
+                className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-pink-400 animate-pulse"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -187,33 +227,35 @@ const Favorites = () => {
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
-              <p className={`text-lg font-semibold mb-2 ${
+              <p className={`text-base sm:text-lg font-semibold mb-2 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-white'
               }`}>No favorites yet</p>
-              <p className={`text-sm ${
+              <p className={`text-xs sm:text-sm px-2 ${
                 theme === 'dark' ? 'text-gray-400' : 'text-white/80'
               }`}>Start saving universities from your recommendations!</p>
               <button
                 onClick={() => navigate('/recommendations')}
-                className="mt-4 px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all"
+                className="mt-4 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base hover:from-blue-600 hover:to-indigo-700 transition-all shadow-xl hover:scale-105 hover:shadow-2xl"
               >
                 View Recommendations
               </button>
             </div>
           ) : !loading && filteredAndSorted.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div ref={cardsRef.ref} className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 scroll-reveal transition-all duration-700 ease-out ${
+              cardsRef.isVisible ? 'revealed' : ''
+            }`}>
               {filteredAndSorted.map((university, index) => {
                 if (!university || !university.name) return null;
                 return (
-                  <div key={`${university.name}-${index}`} className="relative">
+                  <div key={`${university.name}-${index}`} className="relative group animate-fadeInUp" style={{ animationDelay: `${index * 0.1}s` }}>
                     <RecommendationCard university={university} />
                     <button
                       onClick={() => handleRemove(university)}
-                      className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-lg z-10"
+                      className="absolute top-3 sm:top-4 right-3 sm:right-4 p-2 sm:p-2.5 bg-red-500/90 backdrop-blur-sm text-white rounded-full hover:bg-red-600 transition-all shadow-xl z-10 hover:scale-110 group-hover:opacity-100 opacity-0"
                       title="Remove from favorites"
                       aria-label="Remove from favorites"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>

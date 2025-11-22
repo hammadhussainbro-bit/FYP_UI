@@ -15,8 +15,6 @@ import Documents from './pages/Documents';
 import UpdateProfile from './pages/UpdateProfile';
 import Favorites from './pages/Favorites';
 import DeadlineTracker from './pages/DeadlineTracker';
-import RecommendationHistory from './pages/RecommendationHistory';
-import Statistics from './pages/Statistics';
 import ProgressTracker from './pages/ProgressTracker';
 import ExploreUniversities from './pages/ExploreUniversities';
 import AdminDashboard from './pages/AdminDashboard';
@@ -85,22 +83,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DeadlineTracker />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/history"
-              element={
-                <ProtectedRoute>
-                  <RecommendationHistory />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/statistics"
-              element={
-                <ProtectedRoute>
-                  <Statistics />
                 </ProtectedRoute>
               }
             />

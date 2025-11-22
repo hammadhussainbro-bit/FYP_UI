@@ -41,7 +41,9 @@ const SearchableDegreeSelect = ({ value, onChange, degrees }) => {
     }
   }, [isOpen]);
 
-  const handleOpen = useCallback(() => {
+  const handleOpen = useCallback((e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setDropdownPosition({
@@ -67,7 +69,8 @@ const SearchableDegreeSelect = ({ value, onChange, degrees }) => {
   return (
     <div className="relative w-full" ref={containerRef}>
       {/* Input/Button */}
-      <div
+      <button
+        type="button"
         onClick={handleOpen}
         className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 cursor-pointer flex items-center justify-between transition-all ${
           theme === 'dark'
@@ -89,7 +92,7 @@ const SearchableDegreeSelect = ({ value, onChange, degrees }) => {
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
-      </div>
+      </button>
 
       {/* Dropdown - Using Portal to escape overflow containers */}
       {isOpen && typeof document !== 'undefined' && createPortal(

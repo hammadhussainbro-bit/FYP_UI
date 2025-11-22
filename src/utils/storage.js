@@ -131,9 +131,21 @@ export const deleteDeadline = (id) => {
   return false;
 };
 
-export const saveRecommendationHistory = (recommendations) => {
+export const saveRecommendationHistory = (recommendations, completed = false) => {
   const userEmail = localStorage.getItem('userEmail');
   if (!userEmail) return false;
+  
+  // Check if questionnaire was completed
+  let isCompleted = completed;
+  if (!isCompleted) {
+    const questionnaires = JSON.parse(localStorage.getItem('questionnaires') || '[]');
+    const userQuestionnaires = questionnaires.filter(q => q.userEmail === userEmail);
+    // Check if there's a completed questionnaire
+    isCompleted = userQuestionnaires.some(q => q.completedAt && q.userEmail === userEmail);
+  }
+  
+  // Only save if completed
+  if (!isCompleted) return false;
   
   const history = JSON.parse(localStorage.getItem('recommendationHistory') || '{}');
   if (!history[userEmail]) {
@@ -143,6 +155,7 @@ export const saveRecommendationHistory = (recommendations) => {
   const entry = {
     id: Date.now().toString(),
     recommendations,
+    completed: true,
     createdAt: new Date().toISOString(),
   };
   
@@ -153,12 +166,32 @@ export const saveRecommendationHistory = (recommendations) => {
   return true;
 };
 
-export const getRecommendationHistory = () => {
+export const getRecommendationHistory = (completedOnly = true) => {
   const userEmail = localStorage.getItem('userEmail');
   if (!userEmail) return [];
   
   const history = JSON.parse(localStorage.getItem('recommendationHistory') || '{}');
-  return history[userEmail] || [];
+  const userHistory = history[userEmail] || [];
+  
+  // Filter to only return completed entries if requested
+  if (completedOnly) {
+    return userHistory.filter(entry => entry.completed === true);
+  }
+  
+  return userHistory;
+};
+
+export const deleteRecommendationHistory = (entryId) => {
+  const userEmail = localStorage.getItem('userEmail');
+  if (!userEmail) return false;
+  
+  const history = JSON.parse(localStorage.getItem('recommendationHistory') || '{}');
+  if (history[userEmail]) {
+    history[userEmail] = history[userEmail].filter(entry => entry.id !== entryId);
+    localStorage.setItem('recommendationHistory', JSON.stringify(history));
+    return true;
+  }
+  return false;
 };
 
 export const saveDocument = (file, metadata) => {

@@ -252,30 +252,6 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link 
-                      to="/statistics" 
-                      className={`text-sm block transition-colors hover:translate-x-1 ${
-                        theme === 'dark' 
-                          ? 'text-gray-400 hover:text-white' 
-                          : 'text-gray-300 hover:text-white'
-                      }`}
-                    >
-                      Statistics
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      to="/history" 
-                      className={`text-sm block transition-colors hover:translate-x-1 ${
-                        theme === 'dark' 
-                          ? 'text-gray-400 hover:text-white' 
-                          : 'text-gray-300 hover:text-white'
-                      }`}
-                    >
-                      History
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
                       to="/documents" 
                       className={`text-sm block transition-colors hover:translate-x-1 ${
                         theme === 'dark' 

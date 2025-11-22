@@ -4,11 +4,16 @@ const AlternativeProgramCard = ({ program }) => {
   const { theme } = useTheme();
   
   return (
-    <div className={`${
-      theme === 'dark'
-        ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700'
-        : 'bg-gradient-to-br from-gray-50 to-amber-50/50 border-amber-200/50'
-    } rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border`}>
+    <div className={`glass-premium rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-4 sm:p-5 md:p-6 border border-white/10 hover:border-white/20 h-full flex flex-col`} style={{ 
+      backdropFilter: 'blur(30px)',
+      WebkitBackdropFilter: 'blur(30px)',
+      background: theme === 'dark' 
+        ? 'linear-gradient(135deg, rgba(31, 41, 55, 0.8) 0%, rgba(17, 24, 39, 0.8) 100%)'
+        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+      boxShadow: theme === 'dark' 
+        ? '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)' 
+        : '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+    }}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <h3 className={`text-xl font-bold mb-2 ${
@@ -81,7 +86,7 @@ const AlternativeProgramCard = ({ program }) => {
         </div>
       </div>
 
-      <button className="w-full mt-4 px-4 py-2.5 sm:py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-semibold text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center">
+      <button className="w-full mt-auto pt-4 px-4 py-2.5 sm:py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg sm:rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all font-semibold text-sm sm:text-base touch-manipulation min-h-[44px] flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 hover:-translate-y-0.5">
         Explore Program
       </button>
     </div>

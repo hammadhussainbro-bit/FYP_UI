@@ -143,7 +143,7 @@ const Landing = () => {
           <div ref={heroRef} className="reveal-init text-center w-full max-w-3xl mx-auto">
             {userName && (
               <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-orange-400 via-amber-300 to-white bg-clip-text text-transparent leading-[1.1] tracking-tight mb-4 sm:mb-5 px-2 drop-shadow-lg" style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)' }}>
-                Hello {userName}
+                Hello {userName.charAt(0).toUpperCase() + userName.slice(1)}
               </div>
             )}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] tracking-tight px-2 drop-shadow-lg" style={{ textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)' }}>

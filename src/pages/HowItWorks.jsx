@@ -1,38 +1,95 @@
+import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useTheme } from '../context/ThemeContext';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { useScrollAnimation } from '../utils/useScrollAnimation';
 
 const HowItWorks = () => {
   const { theme } = useTheme();
+  const [loading, setLoading] = useState(true);
+  const heroRef = useScrollAnimation();
+  const step1Ref = useScrollAnimation();
+  const step2Ref = useScrollAnimation();
+  const step3Ref = useScrollAnimation();
+  const step4Ref = useScrollAnimation();
+  const techRef = useScrollAnimation();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className={`min-h-screen flex flex-col ${
+    <div className={`min-h-screen flex flex-col relative overflow-hidden ${
       theme === 'dark' 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
     }`}>
+      {loading && <LoadingSpinner fullScreen size="xl" />}
+      
+      {/* Animated Background Blobs - More blobs */}
+      <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden" style={{ mixBlendMode: 'screen' }}>
+        <div 
+          className="w-[400px] h-[400px] sm:w-[500px] sm:h-[500px] md:w-[600px] md:h-[600px] bg-fuchsia-500 rounded-full blur-3xl absolute top-20 left-20" 
+          style={{
+            animation: 'blobMove1 18s ease-in-out infinite',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] md:w-[550px] md:h-[550px] bg-indigo-500 rounded-full blur-3xl absolute bottom-20 -right-20" 
+          style={{
+            animation: 'blobMove2 18s ease-in-out infinite',
+            animationDelay: '3s',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] bg-purple-500 rounded-full blur-3xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" 
+          style={{
+            animation: 'blobMove1 20s ease-in-out infinite',
+            animationDelay: '6s',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] bg-pink-500 rounded-full blur-3xl absolute top-1/4 right-1/4" 
+          style={{
+            animation: 'blobMove2 22s ease-in-out infinite',
+            animationDelay: '9s',
+            willChange: 'transform',
+          }}
+        />
+      </div>
+
       <Navbar />
       
-      <div className="flex-1 px-4 sm:px-6 lg:px-8 py-20">
+      <div className={`flex-1 px-3 sm:px-4 md:px-6 lg:px-8 py-12 sm:py-16 md:py-20 relative z-10 transition-opacity duration-300 ${loading ? 'opacity-0' : 'opacity-100'}`}>
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12 animate-fadeIn px-2">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4">
+          <div ref={heroRef.ref} className={`text-center mb-6 sm:mb-8 md:mb-12 px-2 transition-all duration-700 ease-out ${
+            heroRef.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-2 sm:mb-3 md:mb-4 drop-shadow-2xl leading-tight">
               How It Works
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-white/80">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-light px-2">
               Powered by cutting-edge AI and machine learning technology
             </p>
           </div>
 
           {/* Process Steps */}
-          <div className="space-y-8 mb-12">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 sm:p-6 md:p-8 border border-white/20 animate-slideIn">
-              <div className="flex items-start space-x-3 sm:space-x-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-lg sm:text-xl">1</span>
+          <div className="space-y-4 sm:space-y-6 md:space-y-8 mb-8 sm:mb-12">
+            <div ref={step1Ref.ref} className={`glass-premium rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 transition-all duration-700 ease-out hover:scale-[1.01] hover:-translate-y-0.5 scroll-reveal ${
+              step1Ref.isVisible ? 'revealed' : ''
+            }`}>
+              <div className="flex items-start space-x-2 sm:space-x-3 md:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl">1</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Data Collection</h2>
-                  <p className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed">
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3">Data Collection</h2>
+                  <p className="text-white/90 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed">
                     Students complete a comprehensive questionnaire covering academic performance
                     (SSC, HSSC percentages), preferred degree programs, university type preferences,
                     location preferences, budget constraints, scholarship needs, academic interests,
@@ -43,14 +100,16 @@ const HowItWorks = () => {
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xl">2</span>
+            <div ref={step2Ref.ref} className={`glass-premium rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 transition-all duration-700 ease-out hover:scale-[1.01] hover:-translate-y-0.5 scroll-reveal ${
+              step2Ref.isVisible ? 'revealed' : ''
+            }`}>
+              <div className="flex items-start space-x-2 sm:space-x-3 md:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl">2</span>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-3">AI Processing</h2>
-                  <p className="text-white/90 text-lg leading-relaxed mb-4">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3">AI Processing</h2>
+                  <p className="text-white/90 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed mb-3 sm:mb-4">
                     Our system leverages state-of-the-art machine learning models, including:
                   </p>
                   <ul className="space-y-2 text-white/90">
@@ -75,14 +134,16 @@ const HowItWorks = () => {
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xl">3</span>
+            <div ref={step3Ref.ref} className={`glass-premium rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 transition-all duration-700 ease-out hover:scale-[1.01] hover:-translate-y-0.5 scroll-reveal ${
+              step3Ref.isVisible ? 'revealed' : ''
+            }`}>
+              <div className="flex items-start space-x-2 sm:space-x-3 md:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl">3</span>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-3">Algorithm Analysis</h2>
-                  <p className="text-white/90 text-lg leading-relaxed mb-4">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3">Algorithm Analysis</h2>
+                  <p className="text-white/90 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed mb-3 sm:mb-4">
                     The AI system employs sophisticated algorithms:
                   </p>
                   <ul className="space-y-2 text-white/90">
@@ -107,14 +168,16 @@ const HowItWorks = () => {
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xl">4</span>
+            <div ref={step4Ref.ref} className={`glass-premium rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 transition-all duration-700 ease-out hover:scale-[1.01] hover:-translate-y-0.5 scroll-reveal ${
+              step4Ref.isVisible ? 'revealed' : ''
+            }`}>
+              <div className="flex items-start space-x-2 sm:space-x-3 md:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-green-400 to-emerald-400 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl">4</span>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-3">Personalized Recommendations</h2>
-                  <p className="text-white/90 text-lg leading-relaxed">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3">Personalized Recommendations</h2>
+                  <p className="text-white/90 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed">
                     The system generates three categories of recommendations:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -143,27 +206,30 @@ const HowItWorks = () => {
           </div>
 
           {/* Technology Stack */}
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 animate-slideIn">
-            <h2 className="text-3xl font-bold text-white mb-6">Technology Stack</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white/5 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">Machine Learning</h3>
-                <ul className="space-y-2 text-white/90">
-                  <li>• PyTorch / TensorFlow for deep learning</li>
-                  <li>• Scikit-learn for traditional ML algorithms</li>
-                  <li>• Transformers library for NLP tasks</li>
-                  <li>• XGBoost for gradient boosting</li>
-                </ul>
-              </div>
-              <div className="bg-white/5 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">Data Processing</h3>
-                <ul className="space-y-2 text-white/90">
-                  <li>• Pandas for data manipulation</li>
-                  <li>• NumPy for numerical computations</li>
-                  <li>• Real-time data pipelines</li>
-                  <li>• Automated feature extraction</li>
-                </ul>
-              </div>
+          <div ref={techRef.ref} className={`glass-premium rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 lg:p-8 transition-all duration-700 ease-out hover:scale-[1.01] scroll-reveal ${
+            techRef.isVisible ? 'revealed' : ''
+          }`}>
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+              <span className="w-0.5 sm:w-1 h-6 sm:h-8 bg-gradient-to-b from-green-400 to-emerald-400 rounded-full"></span>
+              Technology Stack
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+              {[
+                { title: 'Machine Learning', items: ['PyTorch / TensorFlow for deep learning', 'Scikit-learn for traditional ML algorithms', 'Transformers library for NLP tasks', 'XGBoost for gradient boosting'] },
+                { title: 'Data Processing', items: ['Pandas for data manipulation', 'NumPy for numerical computations', 'Real-time data pipelines', 'Automated feature extraction'] }
+              ].map((tech, idx) => (
+                <div key={idx} className="glass-premium rounded-xl p-4 sm:p-5 md:p-6 hover:scale-105 transition-all duration-300">
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white mb-2 sm:mb-3">{tech.title}</h3>
+                  <ul className="space-y-1.5 sm:space-y-2 text-white/90">
+                    {tech.items.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs sm:text-sm md:text-base">
+                        <span className="text-purple-400 mt-1 flex-shrink-0">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </div>
         </div>

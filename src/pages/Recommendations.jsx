@@ -6,11 +6,18 @@ import RecommendationCard from '../components/RecommendationCard';
 import BackupCard from '../components/BackupCard';
 import AlternativeProgramCard from '../components/AlternativeProgramCard';
 import UniversityComparison from '../components/UniversityComparison';
+import CompareSelectorModal from '../components/CompareSelectorModal';
+import HistoryViewModal from '../components/HistoryViewModal';
+import UniversityDetailModal from '../components/UniversityDetailModal';
 import { useFormContext } from '../context/FormContext';
 import { useTheme } from '../context/ThemeContext';
-import { saveRecommendationHistory, updateProgress } from '../utils/storage';
+import { saveRecommendationHistory, updateProgress, getRecommendationHistory, deleteRecommendationHistory } from '../utils/storage';
+import { generateHistoryPDF } from '../utils/pdfGenerator';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { SkeletonList } from '../components/SkeletonLoader';
+import { useScrollAnimation } from '../utils/useScrollAnimation';
 
 // Mock data for recommendations - moved outside component for stability
 const topUniversities = [
@@ -127,10 +134,47 @@ const Recommendations = () => {
   const { resetFormData } = useFormContext();
   const [comparisonUnis, setComparisonUnis] = useState([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [showCompareSelector, setShowCompareSelector] = useState(false);
+  const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [viewDetailUniversity, setViewDetailUniversity] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('matchScore');
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [recommendationHistory, setRecommendationHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [viewHistoryEntry, setViewHistoryEntry] = useState(null);
+  const heroRef = useScrollAnimation();
+  const topRef = useScrollAnimation();
+  const backupRef = useScrollAnimation();
+  const altRef = useScrollAnimation();
+  const historyRef = useScrollAnimation();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Load recommendation history
+  useEffect(() => {
+    const history = getRecommendationHistory(true); // Only completed
+    setRecommendationHistory(history);
+  }, []);
+
+  // Handle delete history entry
+  const handleDeleteHistory = (entryId) => {
+    if (window.confirm('Are you sure you want to delete this recommendation history?')) {
+      deleteRecommendationHistory(entryId);
+      const updatedHistory = getRecommendationHistory(true);
+      setRecommendationHistory(updatedHistory);
+    }
+  };
+
+  // Handle view history entry
+  const handleViewHistory = (entry) => {
+    setViewHistoryEntry(entry);
+  };
 
   // Filter and sort functions - using useMemo to avoid recreation
   const filteredTop = useMemo(() => {
@@ -212,24 +256,45 @@ const Recommendations = () => {
   }, [searchTerm, filterType, sortBy]);
 
   const handleCompare = (university) => {
-    if (comparisonUnis.length < 3) {
-      if (!comparisonUnis.find(u => u.name === university.name)) {
-        setComparisonUnis([...comparisonUnis, university]);
-        setShowComparison(true);
-      }
+    setSelectedUniversity(university);
+    setShowCompareSelector(true);
+  };
+
+  const handleViewDetails = (university) => {
+    setViewDetailUniversity(university);
+  };
+
+  const handleSelectUniversityToCompare = (selectedUni) => {
+    if (!comparisonUnis.find(u => u.name === selectedUni.name) && 
+        !comparisonUnis.find(u => u.name === selectedUniversity.name)) {
+      setComparisonUnis([selectedUniversity, selectedUni]);
+      setShowComparison(true);
     }
   };
 
-  // Save recommendation history on mount
+  // Combine all universities for comparison selector
+  const allUniversitiesForComparison = useMemo(() => {
+    return [...(topUniversities || []), ...(backupUniversities || [])];
+  }, []);
+
+  // Save recommendation history on mount - only if questionnaire was completed
   useEffect(() => {
     try {
-      const allRecommendations = {
-        top: topUniversities,
-        backup: backupUniversities,
-        alternative: alternativePrograms,
-      };
-      saveRecommendationHistory(allRecommendations);
-      updateProgress('recommendations_viewed');
+      // Check if questionnaire was completed
+      const questionnaires = JSON.parse(localStorage.getItem('questionnaires') || '[]');
+      const userEmail = localStorage.getItem('userEmail');
+      const userQuestionnaires = questionnaires.filter(q => q.userEmail === userEmail);
+      const isCompleted = userQuestionnaires.some(q => q.completedAt && q.userEmail === userEmail);
+      
+      if (isCompleted) {
+        const allRecommendations = {
+          top: topUniversities,
+          backup: backupUniversities,
+          alternative: alternativePrograms,
+        };
+        saveRecommendationHistory(allRecommendations, true); // Mark as completed
+        updateProgress('recommendations_viewed');
+      }
     } catch (err) {
       console.error('Error saving recommendation history:', err);
       setError(err.message);
@@ -472,117 +537,321 @@ const Recommendations = () => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col overflow-x-hidden w-full ${
+    <div className={`min-h-screen flex flex-col overflow-x-hidden w-full relative ${
       theme === 'dark' 
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-700'
     }`}>
+      {loading && <LoadingSpinner fullScreen size="xl" />}
+      
+      {/* Animated Background Blobs - More blobs */}
+      <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden" style={{ mixBlendMode: 'screen' }}>
+        <div 
+          className="w-[400px] h-[400px] sm:w-[500px] sm:h-[500px] md:w-[600px] md:h-[600px] bg-fuchsia-500 rounded-full blur-3xl absolute -top-20 -left-20" 
+          style={{
+            animation: 'blobMove1 18s ease-in-out infinite',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] md:w-[550px] md:h-[550px] bg-indigo-500 rounded-full blur-3xl absolute bottom-20 right-20" 
+          style={{
+            animation: 'blobMove2 18s ease-in-out infinite',
+            animationDelay: '3s',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] bg-purple-500 rounded-full blur-3xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" 
+          style={{
+            animation: 'blobMove1 20s ease-in-out infinite',
+            animationDelay: '6s',
+            willChange: 'transform',
+          }}
+        />
+        <div 
+          className="w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] bg-pink-500 rounded-full blur-3xl absolute top-1/4 right-1/4" 
+          style={{
+            animation: 'blobMove2 22s ease-in-out infinite',
+            animationDelay: '9s',
+            willChange: 'transform',
+          }}
+        />
+      </div>
+
       <Navbar />
       
-      <div className="flex-1 px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12 w-full overflow-x-hidden">
+      <div className={`flex-1 px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12 w-full overflow-x-hidden relative z-10 transition-opacity duration-300 ${loading ? 'opacity-0' : 'opacity-100'}`}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12 px-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+          <div ref={heroRef.ref} className={`text-center mb-6 sm:mb-8 md:mb-12 px-2 scroll-reveal transition-all duration-700 ease-out ${
+            heroRef.isVisible ? 'revealed' : ''
+          }`}>
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-white via-yellow-200 to-purple-200 bg-clip-text text-transparent mb-2 sm:mb-3 md:mb-4 drop-shadow-2xl leading-tight">
               Your University Recommendations
             </h1>
-            <p className="text-white/80 text-sm sm:text-base md:text-lg">
+            <p className="text-white/90 text-xs sm:text-sm md:text-base lg:text-lg font-light px-2">
               Based on your profile and preferences
             </p>
           </div>
 
-          {/* Search and Filter */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between w-full">
-            <input
-              type="text"
-              placeholder="Search universities..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`flex-1 w-full sm:max-w-md px-4 py-2.5 sm:py-2 rounded-lg text-sm sm:text-base min-h-[44px] ${
-                theme === 'dark'
-                  ? 'bg-gray-800 text-gray-200 border border-gray-700'
-                  : 'bg-white/90 text-gray-800 border border-white/30'
-              }`}
-            />
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
-                  theme === 'dark'
-                    ? 'bg-gray-800 text-gray-200 border border-gray-700'
-                    : 'bg-white/90 text-gray-800 border border-white/30'
-                }`}
-              >
-                <option value="all">All</option>
-                <option value="top">Top Matches</option>
-                <option value="backup">Backup Options</option>
-              </select>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base min-h-[44px] ${
-                  theme === 'dark'
-                    ? 'bg-gray-800 text-gray-200 border border-gray-700'
-                    : 'bg-white/90 text-gray-800 border border-white/30'
-                }`}
-              >
-                <option value="matchScore">Sort by Match</option>
-                <option value="name">Sort by Name</option>
-                <option value="fee">Sort by Fee</option>
-              </select>
+          {/* Search and Filter - Liquid Glass Design */}
+          <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between w-full">
+            <div className="relative flex-1 w-full sm:max-w-md group">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-fuchsia-500/20 rounded-xl sm:rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <input
+                type="text"
+                placeholder="Search universities..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="relative w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm md:text-base min-h-[48px] text-white placeholder-white/50 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] focus:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                style={{
+                  background: theme === 'dark'
+                    ? 'linear-gradient(135deg, rgba(31, 41, 55, 0.4) 0%, rgba(17, 24, 39, 0.4) 100%)'
+                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                  backdropFilter: 'blur(30px)',
+                  WebkitBackdropFilter: 'blur(30px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                }}
+              />
+              <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl sm:rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="relative flex-1 sm:flex-none px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl font-semibold text-xs sm:text-sm md:text-base min-h-[48px] text-white backdrop-blur-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400/50 cursor-pointer appearance-none"
+                  style={{
+                    background: theme === 'dark'
+                      ? 'linear-gradient(135deg, rgba(31, 41, 55, 0.4) 0%, rgba(17, 24, 39, 0.4) 100%)'
+                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                    backdropFilter: 'blur(30px)',
+                    WebkitBackdropFilter: 'blur(30px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                  }}
+                >
+                  <option value="all" className="bg-gray-800 text-white">All</option>
+                  <option value="top" className="bg-gray-800 text-white">Top Matches</option>
+                  <option value="backup" className="bg-gray-800 text-white">Backup Options</option>
+                </select>
+                <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg className="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl sm:rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="relative flex-1 sm:flex-none px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl font-semibold text-xs sm:text-sm md:text-base min-h-[48px] text-white backdrop-blur-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-400/50 cursor-pointer appearance-none"
+                  style={{
+                    background: theme === 'dark'
+                      ? 'linear-gradient(135deg, rgba(31, 41, 55, 0.4) 0%, rgba(17, 24, 39, 0.4) 100%)'
+                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                    backdropFilter: 'blur(30px)',
+                    WebkitBackdropFilter: 'blur(30px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                  }}
+                >
+                  <option value="matchScore" className="bg-gray-800 text-white">Sort by Match</option>
+                  <option value="name" className="bg-gray-800 text-white">Sort by Name</option>
+                  <option value="fee" className="bg-gray-800 text-white">Sort by Fee</option>
+                </select>
+                <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg className="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Top Universities Section */}
-          <section className="mb-12 sm:mb-16">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-4 sm:mb-6 flex items-center px-2">
-              <span className="w-1 h-6 sm:h-8 bg-yellow-400 mr-2 sm:mr-3 rounded"></span>
+          <section ref={topRef.ref} className={`mb-8 sm:mb-12 md:mb-16 scroll-reveal transition-all duration-700 ease-out ${
+            topRef.isVisible ? 'revealed' : ''
+          }`}>
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-6 flex items-center px-2">
+              <span className="w-0.5 sm:w-1 h-5 sm:h-6 md:h-8 bg-gradient-to-b from-yellow-400 to-orange-400 mr-2 sm:mr-3 rounded"></span>
               Top Recommendations
             </h2>
             {filteredTop.length === 0 ? (
-              <p className={`text-center py-8 ${
+              <p className={`text-center py-6 sm:py-8 glass-premium rounded-xl text-xs sm:text-sm md:text-base ${
                 theme === 'dark' ? 'text-gray-400' : 'text-white/80'
               }`}>No universities match your search criteria</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 items-stretch">
                 {filteredTop.map((university, index) => (
-                  <RecommendationCard key={index} university={university} onCompare={handleCompare} />
+                  <div key={index} className="animate-fadeInUp h-full flex" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <RecommendationCard university={university} onCompare={handleCompare} onViewDetails={handleViewDetails} />
+                  </div>
                 ))}
               </div>
             )}
           </section>
 
           {/* Backup Universities Section */}
-          <section className="mb-12 sm:mb-16">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-4 sm:mb-6 flex items-center px-2">
-              <span className="w-1 h-6 sm:h-8 bg-purple-400 mr-2 sm:mr-3 rounded"></span>
+          <section ref={backupRef.ref} className={`mb-8 sm:mb-12 md:mb-16 scroll-reveal transition-all duration-700 ease-out ${
+            backupRef.isVisible ? 'revealed' : ''
+          }`}>
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-6 flex items-center px-2">
+              <span className="w-0.5 sm:w-1 h-5 sm:h-6 md:h-8 bg-gradient-to-b from-purple-400 to-pink-400 mr-2 sm:mr-3 rounded"></span>
               Backup Options
             </h2>
             {filteredBackup.length === 0 ? (
-              <p className={`text-center py-8 ${
+              <p className={`text-center py-6 sm:py-8 glass-premium rounded-xl text-xs sm:text-sm md:text-base ${
                 theme === 'dark' ? 'text-gray-400' : 'text-white/80'
               }`}>No backup options match your search criteria</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 items-stretch">
                 {filteredBackup.map((university, index) => (
-                  <BackupCard key={index} university={university} onCompare={handleCompare} />
+                  <div key={index} className="animate-fadeInUp h-full flex" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <BackupCard university={university} onCompare={handleCompare} onViewDetails={handleViewDetails} />
+                  </div>
                 ))}
               </div>
             )}
           </section>
 
           {/* Alternative Programs Section */}
-          <section className="mb-12 sm:mb-16">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-4 sm:mb-6 flex items-center px-2">
-              <span className="w-1 h-6 sm:h-8 bg-amber-400 mr-2 sm:mr-3 rounded"></span>
+          <section ref={altRef.ref} className={`mb-8 sm:mb-12 md:mb-16 scroll-reveal transition-all duration-700 ease-out ${
+            altRef.isVisible ? 'revealed' : ''
+          }`}>
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white mb-3 sm:mb-4 md:mb-6 flex items-center px-2">
+              <span className="w-0.5 sm:w-1 h-5 sm:h-6 md:h-8 bg-gradient-to-b from-blue-400 to-cyan-400 mr-2 sm:mr-3 rounded"></span>
               Alternative Programs
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 items-stretch">
               {alternativePrograms.map((program, index) => (
-                <AlternativeProgramCard key={index} program={program} />
+                <div key={index} className="animate-fadeInUp h-full flex" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <AlternativeProgramCard program={program} />
+                </div>
               ))}
             </div>
           </section>
+
+          {/* Recommendation History Section */}
+          {recommendationHistory.length > 0 && (
+            <section ref={historyRef.ref} className={`mb-8 sm:mb-12 md:mb-16 scroll-reveal transition-all duration-700 ease-out ${
+              historyRef.isVisible ? 'revealed' : ''
+            }`}>
+              <div className="flex items-center justify-between mb-4 sm:mb-6 px-2">
+                <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white flex items-center">
+                  <span className="w-0.5 sm:w-1 h-5 sm:h-6 md:h-8 bg-gradient-to-b from-purple-400 to-pink-400 mr-2 sm:mr-3 rounded"></span>
+                  Previous Recommendations
+                </h2>
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="group px-4 py-2 rounded-xl glass-premium border border-white/20 text-white text-sm font-semibold hover:scale-105 transition-all"
+                  style={{
+                    backdropFilter: 'blur(30px)',
+                    WebkitBackdropFilter: 'blur(30px)',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                  }}
+                >
+                  {showHistory ? 'Hide' : 'Show'} History
+                  <svg className={`w-4 h-4 ml-2 inline transition-transform duration-300 ${showHistory ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+              
+              {showHistory && (
+                <div className="space-y-4 animate-fadeIn">
+                  {recommendationHistory.map((entry, index) => (
+                    <div
+                      key={entry.id}
+                      className="glass-premium rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.01] group"
+                      style={{
+                        backdropFilter: 'blur(30px)',
+                        WebkitBackdropFilter: 'blur(30px)',
+                        background: theme === 'dark' 
+                          ? 'linear-gradient(135deg, rgba(31, 41, 55, 0.8) 0%, rgba(17, 24, 39, 0.8) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                      }}
+                    >
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0 shadow-lg">
+                              {new Date(entry.createdAt).getDate()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base sm:text-lg font-bold text-white mb-1 truncate">
+                                {new Date(entry.createdAt).toLocaleDateString('en-US', { 
+                                  weekday: 'long', 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric' 
+                                })}
+                              </h3>
+                              <p className="text-xs sm:text-sm text-white/70">
+                                {entry.recommendations?.top?.length || 0} top matches • {entry.recommendations?.backup?.length || 0} backup options
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                          {/* View Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewHistory(entry);
+                            }}
+                            className="group relative px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold text-xs sm:text-sm transition-all hover:scale-105 hover:-translate-y-0.5 shadow-lg hover:shadow-xl flex items-center gap-1.5 sm:gap-2 overflow-hidden"
+                          >
+                            <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            <svg className="w-4 h-4 group-hover:scale-110 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <span className="relative z-10 hidden sm:inline">View</span>
+                          </button>
+                          
+                          {/* Download PDF Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              generateHistoryPDF(entry);
+                            }}
+                            className="group relative px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold text-xs sm:text-sm transition-all hover:scale-105 hover:-translate-y-0.5 shadow-lg hover:shadow-xl flex items-center gap-1.5 sm:gap-2 overflow-hidden"
+                          >
+                            <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            <svg className="w-4 h-4 group-hover:translate-y-0.5 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span className="relative z-10 hidden sm:inline">PDF</span>
+                          </button>
+                          
+                          {/* Delete Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteHistory(entry.id);
+                            }}
+                            className="group relative px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold text-xs sm:text-sm transition-all hover:scale-105 hover:-translate-y-0.5 shadow-lg hover:shadow-xl flex items-center gap-1.5 sm:gap-2 overflow-hidden"
+                          >
+                            <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            <svg className="w-4 h-4 group-hover:scale-110 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span className="relative z-10 hidden sm:inline">Delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-stretch sm:items-center mt-8 sm:mt-12 px-2 sm:px-4">
@@ -632,6 +901,32 @@ const Recommendations = () => {
             setShowComparison(false);
             setComparisonUnis([]);
           }}
+        />
+      )}
+
+      {showCompareSelector && selectedUniversity && (
+        <CompareSelectorModal
+          university={selectedUniversity}
+          allUniversities={allUniversitiesForComparison}
+          onSelect={handleSelectUniversityToCompare}
+          onClose={() => {
+            setShowCompareSelector(false);
+            setSelectedUniversity(null);
+          }}
+        />
+      )}
+
+      {viewHistoryEntry && (
+        <HistoryViewModal
+          historyEntry={viewHistoryEntry}
+          onClose={() => setViewHistoryEntry(null)}
+        />
+      )}
+
+      {viewDetailUniversity && (
+        <UniversityDetailModal
+          university={viewDetailUniversity}
+          onClose={() => setViewDetailUniversity(null)}
         />
       )}
 
